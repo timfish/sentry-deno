@@ -28,13 +28,25 @@ function guessAppRoot(): string | undefined {
     return dirname(paths[0]);
   }
 
-  // Iterate over the paths and find the common root
+  // Iterate over the paths and bail out when they no longer have a common root
   let i = 0;
   while (paths[0][i] && paths.every((w) => w[i] === paths[0][i])) {
     i++;
   }
 
   return paths[0].substr(0, i);
+}
+
+async function getCwd(): Promise<string | undefined> {
+  const permission = await Deno.permissions.query({ name: "read", path: "./" });
+
+  try {
+    if (permission.state == "granted") {
+      return Deno.cwd();
+    }
+  } catch (_) {
+    //
+  }
 }
 
 /** Adds Electron context to events and normalises paths. */
@@ -49,17 +61,15 @@ export class NormalizePaths implements Integration {
   public setupOnce(
     addGlobalEventProcessor: (callback: EventProcessor) => void
   ): void {
-    const appRoot = guessAppRoot();
+    addGlobalEventProcessor(async (event: Event): Promise<Event | null> => {
+      const appRoot = (await getCwd()) || guessAppRoot();
 
-    if (!appRoot) {
-      return;
-    }
-
-    addGlobalEventProcessor((event: Event) => {
-      for (const exception of event.exception?.values || []) {
-        for (const frame of exception.stacktrace?.frames || []) {
-          if (frame.filename && frame.in_app) {
-            frame.filename = frame.filename.replace(appRoot, "app:///");
+      if (appRoot) {
+        for (const exception of event.exception?.values || []) {
+          for (const frame of exception.stacktrace?.frames || []) {
+            if (frame.filename && frame.in_app) {
+              frame.filename = frame.filename.replace(appRoot, "app:///");
+            }
           }
         }
       }

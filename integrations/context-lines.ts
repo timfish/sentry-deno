@@ -10,9 +10,8 @@ import LRU from "https://deno.land/x/lru_cache@6.0.0-deno.4/mod.ts";
 const FILE_CONTENT_CACHE = new LRU<string, string | null>(100);
 const DEFAULT_LINES_OF_CONTEXT = 7;
 
-async function readTextFileAsync(path: string): Promise<string> {
-  const decoder = new TextDecoder("utf-8");
-  return decoder.decode(await Deno.readFile(path));
+function readTextFileAsync(path: string): Promise<string> {
+  return Deno.readTextFile(path);
 }
 
 /**
