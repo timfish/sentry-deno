@@ -1,8 +1,4 @@
-import {
-  Event,
-  EventProcessor,
-  Integration,
-} from "https://esm.sh/@sentry/types@7.7.0";
+import { Event, EventProcessor, Integration } from "../deps.ts";
 
 function getOSName(): string {
   switch (Deno.build.os) {

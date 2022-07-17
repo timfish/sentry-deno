@@ -2,32 +2,38 @@ import {
   getCurrentHub,
   getIntegrationsToSetup,
   initAndBind,
-} from "https://esm.sh/@sentry/core@7.7.0";
-import {
   nodeStackLineParser,
   createStackParser,
-  logger,
-} from "https://esm.sh/@sentry/utils@7.7.0";
-import { Options } from "https://esm.sh/@sentry/types@7.7.0";
-import { Breadcrumbs, Dedupe } from "https://esm.sh/@sentry/browser@7.7.0";
+  Options,
+  Breadcrumbs,
+  Dedupe,
+} from "./deps.ts";
 
 import { DenoClient } from "./client.ts";
 import {} from "./eventbuilder.ts";
 import { DenoTransportOptions, makeFetchTransport } from "./transport.ts";
 import { DenoContext } from "./integrations/context.ts";
 import { GlobalHandlers } from "./integrations/globalhandlers.ts";
+import { ContextLines } from "./integrations/context-lines.ts";
+import { NormalizePaths } from "./integrations/normalize.ts";
 export * from "./exports.ts";
 
 // deno-lint-ignore no-empty-interface
 export interface DenoOptions extends Options<DenoTransportOptions> {}
 
 export function init(options: DenoOptions = {}) {
+  if (!options.dsn) {
+    return;
+  }
+
   if (options.defaultIntegrations == undefined) {
     options.defaultIntegrations = [
+      new ContextLines(),
       new Breadcrumbs({ xhr: false, history: false, dom: false }),
       new Dedupe(),
       new DenoContext(),
       new GlobalHandlers(),
+      new NormalizePaths(),
     ];
   }
 
@@ -63,7 +69,7 @@ export async function flush(timeout?: number): Promise<boolean> {
   if (client) {
     return await client.flush(timeout);
   }
-  __DEBUG_BUILD__ && logger.warn("Cannot flush events. No client defined.");
+
   return Promise.resolve(false);
 }
 
@@ -80,7 +86,6 @@ export async function close(timeout?: number): Promise<boolean> {
   if (client) {
     return await client.close(timeout);
   }
-  __DEBUG_BUILD__ &&
-    logger.warn("Cannot flush events and disable SDK. No client defined.");
+
   return Promise.resolve(false);
 }

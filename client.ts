@@ -1,11 +1,15 @@
-import { BaseClient } from "https://esm.sh/@sentry/core@7.7.0";
 import {
+  BaseClient,
+  JS_SDK_VERSION,
   Event,
   EventHint,
   Severity,
   SeverityLevel,
   ClientOptions,
-} from "https://esm.sh/@sentry/types@7.7.0";
+  dsnFromString,
+  logger,
+  RealScope,
+} from "./deps.ts";
 
 import { eventFromMessage, eventFromUnknownInput } from "./eventbuilder.ts";
 import { DenoTransportOptions } from "./transport.ts";
@@ -22,6 +26,12 @@ export class DenoClient extends BaseClient<DenoClientOptions> {
     options._metadata.sdk = options._metadata.sdk || {
       name: "sentry.javascript.deno",
       version: SDK_VERSION,
+      packages: [
+        {
+          name: "npm:@sentry/core",
+          version: JS_SDK_VERSION,
+        },
+      ],
     };
 
     super(options);
@@ -37,7 +47,7 @@ export class DenoClient extends BaseClient<DenoClientOptions> {
     );
   }
 
-  eventFromMessage(
+  public eventFromMessage(
     message: string,
     level?: Severity | SeverityLevel | undefined,
     hint?: EventHint | undefined
@@ -51,6 +61,31 @@ export class DenoClient extends BaseClient<DenoClientOptions> {
         this._options.attachStacktrace
       )
     );
+  }
+
+  protected async _prepareEvent(
+    event: Event,
+    hint: EventHint,
+    scope?: RealScope | undefined
+  ): Promise<Event | null> {
+    if (this._options.dsn) {
+      // Check if we have permissions to send this event
+      const dsn = dsnFromString(this._options.dsn);
+      const permission = await Deno.permissions.query({
+        name: "net",
+        host: dsn.host,
+      });
+
+      if (permission.state !== "granted") {
+        logger.warn(
+          "Event was not sent due to missing permissions. Run Deno with --allow-net to allow sending of events."
+        );
+
+        return null;
+      }
+    }
+
+    return await super._prepareEvent(event, hint, scope);
   }
 
   public flush(timeout?: number): PromiseLike<boolean> {

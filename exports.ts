@@ -12,7 +12,6 @@ export {
   makeMain,
   Scope,
   startTransaction,
-  SDK_VERSION,
   setContext,
   setExtra,
   setExtras,

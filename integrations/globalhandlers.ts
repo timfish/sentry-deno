@@ -1,18 +1,14 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { getCurrentHub } from "https://esm.sh/@sentry/core@7.7.0";
 import {
   Event,
   EventHint,
   Hub,
   Integration,
   StackParser,
-} from "https://esm.sh/@sentry/types@7.7.0";
-import {
+  getCurrentHub,
   addExceptionMechanism,
   getLocationHref,
-  isErrorEvent,
   isString,
-} from "https://esm.sh/@sentry/utils@7.7.0";
+} from "../deps.ts";
 
 import { DenoClient } from "../client.ts";
 import { eventFromUnknownInput } from "../eventbuilder.ts";
@@ -84,74 +80,28 @@ export class GlobalHandlers implements Integration {
 
 function _installGlobalErrorHandler(): void {
   addEventListener("error", (data) => {
-    data.preventDefault();
-
     const [hub, stackParser] = getHubAndOptions();
-    if (!hub.getIntegration(GlobalHandlers)) {
-      return;
-    }
-
     const { message, filename, lineno, colno, error } = data;
 
-    const event =
-      error === undefined && isString(message)
-        ? _eventFromIncompleteOnError(message, filename, lineno, colno)
-        : _enhanceEventWithInitialFrame(
-            eventFromUnknownInput(stackParser, error || message, undefined),
-            filename,
-            lineno,
-            colno
-          );
+    const event = _enhanceEventWithInitialFrame(
+      eventFromUnknownInput(stackParser, error || message),
+      filename,
+      lineno,
+      colno
+    );
 
     event.level = "error";
 
     addMechanismAndCapture(hub, error, event, "error");
+
+    // Stop the app from exiting for now
+    data.preventDefault();
 
     flush().then(() => {
       console.error(data.error);
       Deno.exit(-1);
     });
   });
-}
-
-/**
- * This function creates a stack from an old, error-less onerror handler.
- */
-function _eventFromIncompleteOnError(
-  // deno-lint-ignore no-explicit-any
-  msg: any,
-  // deno-lint-ignore no-explicit-any
-  url: any,
-  // deno-lint-ignore no-explicit-any
-  line: any,
-  // deno-lint-ignore no-explicit-any
-  column: any
-): Event {
-  const ERROR_TYPES_RE =
-    /^(?:[Uu]ncaught (?:exception: )?)?(?:((?:Eval|Internal|Range|Reference|Syntax|Type|URI|)Error): )?(.*)$/i;
-
-  // If 'message' is ErrorEvent, get real message from inside
-  let message = isErrorEvent(msg) ? msg.message : msg;
-  let name = "Error";
-
-  const groups = message.match(ERROR_TYPES_RE);
-  if (groups) {
-    name = groups[1];
-    message = groups[2];
-  }
-
-  const event = {
-    exception: {
-      values: [
-        {
-          type: name,
-          value: message,
-        },
-      ],
-    },
-  };
-
-  return _enhanceEventWithInitialFrame(event, url, line, column);
 }
 
 function _enhanceEventWithInitialFrame(
@@ -207,12 +157,12 @@ function addMechanismAndCapture(
   });
 }
 
-function getHubAndOptions(): [Hub, StackParser, boolean | undefined] {
+function getHubAndOptions(): [Hub, StackParser] {
   const hub = getCurrentHub();
   const client = hub.getClient<DenoClient>();
   const options = (client && client.getOptions()) || {
     stackParser: () => [],
     attachStacktrace: false,
   };
-  return [hub, options.stackParser, options.attachStacktrace];
+  return [hub, options.stackParser];
 }

@@ -1,10 +1,10 @@
-import { createTransport } from "https://esm.sh/@sentry/core";
 import {
+  createTransport,
   BaseTransportOptions,
   Transport,
   TransportRequest,
   TransportMakeRequestResponse,
-} from "https://esm.sh/@sentry/types";
+} from "./deps.ts";
 
 export interface DenoTransportOptions extends BaseTransportOptions {
   headers?: Record<string, string>;

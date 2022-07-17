@@ -1,5 +1,5 @@
-import { getCurrentHub } from "https://esm.sh/@sentry/hub@7.7.0";
 import {
+  getCurrentHub,
   Event,
   EventHint,
   Exception,
@@ -9,15 +9,13 @@ import {
   SeverityLevel,
   StackFrame,
   StackParser,
-} from "https://esm.sh/@sentry/types@7.7.0";
-import {
   addExceptionMechanism,
   addExceptionTypeValue,
   extractExceptionKeysForMessage,
   isError,
   isPlainObject,
   normalizeToSize,
-} from "https://esm.sh/@sentry/utils@7.7.0";
+} from "./deps.ts";
 
 /**
  * Extracts stack frames from the error.stack string
