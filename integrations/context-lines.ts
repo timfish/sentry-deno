@@ -28,7 +28,7 @@ interface ContextLinesOptions {
    * Defaults to 7.
    *
    * Set to 0 to disable loading and inclusion of source files.
-   **/
+   */
   frameContextLines?: number;
 }
 
@@ -57,7 +57,7 @@ export class ContextLines implements Integration {
    * @inheritDoc
    */
   public setupOnce(
-    addGlobalEventProcessor: (callback: EventProcessor) => void
+    addGlobalEventProcessor: (callback: EventProcessor) => void,
   ): void {
     addGlobalEventProcessor((event) => this.addSourceContext(event));
   }

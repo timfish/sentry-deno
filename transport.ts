@@ -1,9 +1,9 @@
 import {
-  createTransport,
   BaseTransportOptions,
+  createTransport,
   Transport,
-  TransportRequest,
   TransportMakeRequestResponse,
+  TransportRequest,
 } from "./deps.ts";
 
 export interface DenoTransportOptions extends BaseTransportOptions {
@@ -16,7 +16,7 @@ export interface DenoTransportOptions extends BaseTransportOptions {
  */
 export function makeFetchTransport(options: DenoTransportOptions): Transport {
   function makeRequest(
-    request: TransportRequest
+    request: TransportRequest,
   ): PromiseLike<TransportMakeRequestResponse> {
     const requestOptions: RequestInit = {
       body: request.body,

@@ -21,13 +21,13 @@ export class DenoContext implements Integration {
 
   /** @inheritDoc */
   public setupOnce(
-    addGlobalEventProcessor: (callback: EventProcessor) => void
+    addGlobalEventProcessor: (callback: EventProcessor) => void,
   ): void {
     addGlobalEventProcessor((event: Event) => {
       event.contexts = {
         app: {
           app_start_time: new Date(
-            Date.now() - performance.now()
+            Date.now() - performance.now(),
           ).toISOString(),
         },
         device: {

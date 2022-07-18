@@ -1,13 +1,13 @@
 import {
+  addExceptionMechanism,
   Event,
   EventHint,
+  getCurrentHub,
+  getLocationHref,
   Hub,
   Integration,
-  StackParser,
-  getCurrentHub,
-  addExceptionMechanism,
-  getLocationHref,
   isString,
+  StackParser,
 } from "../deps.ts";
 
 import { DenoClient } from "../client.ts";
@@ -87,7 +87,7 @@ function _installGlobalErrorHandler(): void {
       eventFromUnknownInput(stackParser, error || message),
       filename,
       lineno,
-      colno
+      colno,
     );
 
     event.level = "error";
@@ -111,7 +111,7 @@ function _enhanceEventWithInitialFrame(
   // deno-lint-ignore no-explicit-any
   line: any,
   // deno-lint-ignore no-explicit-any
-  column: any
+  column: any,
 ): Event {
   // event.exception
   const e = (event.exception = event.exception || {});
@@ -146,7 +146,7 @@ function addMechanismAndCapture(
   hub: Hub,
   error: EventHint["originalException"],
   event: Event,
-  type: string
+  type: string,
 ): void {
   addExceptionMechanism(event, {
     handled: false,

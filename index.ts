@@ -1,12 +1,12 @@
 import {
+  Breadcrumbs,
+  createStackParser,
+  Dedupe,
   getCurrentHub,
   getIntegrationsToSetup,
   initAndBind,
   nodeStackLineParser,
-  createStackParser,
   Options,
-  Breadcrumbs,
-  Dedupe,
 } from "./deps.ts";
 
 import { DenoClient } from "./client.ts";

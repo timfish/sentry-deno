@@ -1,20 +1,20 @@
 import {
-  getCurrentHub,
+  addExceptionMechanism,
+  addExceptionTypeValue,
   Event,
   EventHint,
   Exception,
+  extractExceptionKeysForMessage,
+  getCurrentHub,
+  isError,
+  isPlainObject,
   Mechanism,
+  normalizeToSize,
   Scope,
   Severity,
   SeverityLevel,
   StackFrame,
   StackParser,
-  addExceptionMechanism,
-  addExceptionTypeValue,
-  extractExceptionKeysForMessage,
-  isError,
-  isPlainObject,
-  normalizeToSize,
 } from "./deps.ts";
 
 /**
@@ -22,7 +22,7 @@ import {
  */
 export function parseStackFrames(
   stackParser: StackParser,
-  error: Error
+  error: Error,
 ): StackFrame[] {
   return stackParser(error.stack || "", 1);
 }
@@ -32,7 +32,7 @@ export function parseStackFrames(
  */
 export function exceptionFromError(
   stackParser: StackParser,
-  error: Error
+  error: Error,
 ): Exception {
   const exception: Exception = {
     type: error.name || error.constructor.name,
@@ -54,12 +54,12 @@ export function exceptionFromError(
 export function eventFromUnknownInput(
   stackParser: StackParser,
   exception: unknown,
-  hint?: EventHint
+  hint?: EventHint,
 ): Event {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let ex: unknown = exception;
-  const providedMechanism: Mechanism | undefined =
-    hint && hint.data && (hint.data as { mechanism: Mechanism }).mechanism;
+  const providedMechanism: Mechanism | undefined = hint && hint.data &&
+    (hint.data as { mechanism: Mechanism }).mechanism;
   const mechanism: Mechanism = providedMechanism || {
     handled: true,
     type: "generic",
@@ -69,9 +69,11 @@ export function eventFromUnknownInput(
     if (isPlainObject(exception)) {
       // This will allow us to group events based on top-level keys
       // which is much better than creating new group when any key/value change
-      const message = `Non-Error exception captured with keys: ${extractExceptionKeysForMessage(
-        exception
-      )}`;
+      const message = `Non-Error exception captured with keys: ${
+        extractExceptionKeysForMessage(
+          exception,
+        )
+      }`;
 
       getCurrentHub().configureScope((scope: Scope) => {
         scope.setExtra("__serialized__", normalizeToSize(exception));
@@ -113,7 +115,7 @@ export function eventFromMessage(
   // eslint-disable-next-line deprecation/deprecation
   level: Severity | SeverityLevel = "info",
   hint?: EventHint,
-  attachStacktrace?: boolean
+  attachStacktrace?: boolean,
 ): Event {
   const event: Event = {
     event_id: hint && hint.event_id,

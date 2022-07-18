@@ -1,14 +1,14 @@
 import {
   BaseClient,
-  JS_SDK_VERSION,
-  Event,
-  EventHint,
-  Severity,
-  SeverityLevel,
   ClientOptions,
   dsnFromString,
+  Event,
+  EventHint,
+  JS_SDK_VERSION,
   logger,
   RealScope,
+  Severity,
+  SeverityLevel,
 } from "./deps.ts";
 
 import { eventFromMessage, eventFromUnknownInput } from "./eventbuilder.ts";
@@ -40,17 +40,17 @@ export class DenoClient extends BaseClient<DenoClientOptions> {
   public eventFromException(
     // deno-lint-ignore no-explicit-any
     exception: any,
-    hint?: EventHint | undefined
+    hint?: EventHint | undefined,
   ): Promise<Event> {
     return Promise.resolve(
-      eventFromUnknownInput(this._options.stackParser, exception, hint)
+      eventFromUnknownInput(this._options.stackParser, exception, hint),
     );
   }
 
   public eventFromMessage(
     message: string,
     level?: Severity | SeverityLevel | undefined,
-    hint?: EventHint | undefined
+    hint?: EventHint | undefined,
   ): PromiseLike<Event> {
     return Promise.resolve(
       eventFromMessage(
@@ -58,15 +58,15 @@ export class DenoClient extends BaseClient<DenoClientOptions> {
         message,
         level,
         hint,
-        this._options.attachStacktrace
-      )
+        this._options.attachStacktrace,
+      ),
     );
   }
 
   protected async _prepareEvent(
     event: Event,
     hint: EventHint,
-    scope?: RealScope | undefined
+    scope?: RealScope | undefined,
   ): Promise<Event | null> {
     if (this._options.dsn) {
       // Check if we have permissions to send this event
@@ -78,7 +78,7 @@ export class DenoClient extends BaseClient<DenoClientOptions> {
 
       if (permission.state !== "granted") {
         logger.warn(
-          "Event was not sent due to missing permissions. Run Deno with --allow-net to allow sending of events."
+          "Event was not sent due to missing permissions. Run Deno with --allow-net to allow sending of events.",
         );
 
         return null;
