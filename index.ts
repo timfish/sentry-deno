@@ -10,12 +10,12 @@ import {
 } from "./deps.ts";
 
 import { DenoClient } from "./client.ts";
-import {} from "./eventbuilder.ts";
 import { DenoTransportOptions, makeFetchTransport } from "./transport.ts";
 import { DenoContext } from "./integrations/context.ts";
 import { GlobalHandlers } from "./integrations/globalhandlers.ts";
 import { ContextLines } from "./integrations/context-lines.ts";
 import { NormalizePaths } from "./integrations/normalize.ts";
+
 export * from "./exports.ts";
 
 // deno-lint-ignore no-empty-interface
