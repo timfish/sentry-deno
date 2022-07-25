@@ -1,0 +1,6 @@
+{
+  "tasks": {
+    "generate-deps": "rm -rf sentry-javascript-deno && deno run --allow-all sentry-javascript-to-deno.ts",
+    "test": "deno bundle ./src/index.ts"
+  }
+}
