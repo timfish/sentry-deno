@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 /* eslint-disable max-lines */
 import { Scope, updateSession } from '../hub/mod.ts';
 import {
@@ -42,7 +42,8 @@ import { getEnvelopeEndpointWithUrlEncodedAuth } from './api.ts';
 import { createEventEnvelope, createSessionEnvelope } from './envelope.ts';
 import { IntegrationIndex, setupIntegrations } from './integration.ts';
 
-const ALREADY_SEEN_ERROR = "Not capturing exception because it's already been captured.";
+const ALREADY_SEEN_ERROR =
+  'Not capturing exception because it\'s already been captured.';
 
 /**
  * Base implementation for all JavaScript SDK clients.
@@ -120,7 +121,11 @@ export abstract class BaseClient<O extends ClientOptions> implements Client<O> {
    * @inheritDoc
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
-  public captureException(exception: any, hint?: EventHint, scope?: Scope): string | undefined {
+  public captureException(
+    exception: any,
+    hint?: EventHint,
+    scope?: Scope,
+  ): string | undefined {
     // ensure we haven't captured this very object before
     if (checkOrSetAlreadyCaught(exception)) {
       true && logger.log(ALREADY_SEEN_ERROR);
@@ -131,8 +136,8 @@ export abstract class BaseClient<O extends ClientOptions> implements Client<O> {
 
     this._process(
       this.eventFromException(exception, hint)
-        .then(event => this._captureEvent(event, hint, scope))
-        .then(result => {
+        .then((event) => this._captureEvent(event, hint, scope))
+        .then((result) => {
           eventId = result;
         }),
     );
@@ -158,8 +163,8 @@ export abstract class BaseClient<O extends ClientOptions> implements Client<O> {
 
     this._process(
       promisedEvent
-        .then(event => this._captureEvent(event, hint, scope))
-        .then(result => {
+        .then((event) => this._captureEvent(event, hint, scope))
+        .then((result) => {
           eventId = result;
         }),
     );
@@ -170,9 +175,16 @@ export abstract class BaseClient<O extends ClientOptions> implements Client<O> {
   /**
    * @inheritDoc
    */
-  public captureEvent(event: Event, hint?: EventHint, scope?: Scope): string | undefined {
+  public captureEvent(
+    event: Event,
+    hint?: EventHint,
+    scope?: Scope,
+  ): string | undefined {
     // ensure we haven't captured this very object before
-    if (hint && hint.originalException && checkOrSetAlreadyCaught(hint.originalException)) {
+    if (
+      hint && hint.originalException &&
+      checkOrSetAlreadyCaught(hint.originalException)
+    ) {
       true && logger.log(ALREADY_SEEN_ERROR);
       return;
     }
@@ -180,7 +192,7 @@ export abstract class BaseClient<O extends ClientOptions> implements Client<O> {
     let eventId: string | undefined = hint && hint.event_id;
 
     this._process(
-      this._captureEvent(event, hint, scope).then(result => {
+      this._captureEvent(event, hint, scope).then((result) => {
         eventId = result;
       }),
     );
@@ -198,7 +210,10 @@ export abstract class BaseClient<O extends ClientOptions> implements Client<O> {
     }
 
     if (!(typeof session.release === 'string')) {
-      true && logger.warn('Discarded session because of missing or non-string release');
+      true &&
+        logger.warn(
+          'Discarded session because of missing or non-string release',
+        );
     } else {
       this.sendSession(session);
       // After sending, we set init false to indicate it's not the first occurrence
@@ -233,8 +248,10 @@ export abstract class BaseClient<O extends ClientOptions> implements Client<O> {
   public flush(timeout?: number): PromiseLike<boolean> {
     const transport = this._transport;
     if (transport) {
-      return this._isClientDoneProcessing(timeout).then(clientFinished => {
-        return transport.flush(timeout).then(transportFlushed => clientFinished && transportFlushed);
+      return this._isClientDoneProcessing(timeout).then((clientFinished) => {
+        return transport.flush(timeout).then((transportFlushed) =>
+          clientFinished && transportFlushed
+        );
       });
     } else {
       return resolvedSyncPromise(true);
@@ -245,7 +262,7 @@ export abstract class BaseClient<O extends ClientOptions> implements Client<O> {
    * @inheritDoc
    */
   public close(timeout?: number): PromiseLike<boolean> {
-    return this.flush(timeout).then(result => {
+    return this.flush(timeout).then((result) => {
       this.getOptions().enabled = false;
       return result;
     });
@@ -273,11 +290,16 @@ export abstract class BaseClient<O extends ClientOptions> implements Client<O> {
   /**
    * @inheritDoc
    */
-  public getIntegration<T extends Integration>(integration: IntegrationClass<T>): T | null {
+  public getIntegration<T extends Integration>(
+    integration: IntegrationClass<T>,
+  ): T | null {
     try {
       return (this._integrations[integration.id] as T) || null;
     } catch (_oO) {
-      true && logger.warn(`Cannot retrieve integration ${integration.id} from the current Client`);
+      true &&
+        logger.warn(
+          `Cannot retrieve integration ${integration.id} from the current Client`,
+        );
       return null;
     }
   }
@@ -287,14 +309,20 @@ export abstract class BaseClient<O extends ClientOptions> implements Client<O> {
    */
   public sendEvent(event: Event, hint: EventHint = {}): void {
     if (this._dsn) {
-      let env = createEventEnvelope(event, this._dsn, this._options._metadata, this._options.tunnel);
+      let env = createEventEnvelope(
+        event,
+        this._dsn,
+        this._options._metadata,
+        this._options.tunnel,
+      );
 
       for (const attachment of hint.attachments || []) {
         env = addItemToEnvelope(
           env,
           createAttachmentEnvelopeItem(
             attachment,
-            this._options.transportOptions && this._options.transportOptions.textEncoder,
+            this._options.transportOptions &&
+              this._options.transportOptions.textEncoder,
           ),
         );
       }
@@ -308,7 +336,12 @@ export abstract class BaseClient<O extends ClientOptions> implements Client<O> {
    */
   public sendSession(session: Session | SessionAggregates): void {
     if (this._dsn) {
-      const env = createSessionEnvelope(session, this._dsn, this._options._metadata, this._options.tunnel);
+      const env = createSessionEnvelope(
+        session,
+        this._dsn,
+        this._options._metadata,
+        this._options.tunnel,
+      );
       this._sendEnvelope(env);
     }
   }
@@ -316,7 +349,10 @@ export abstract class BaseClient<O extends ClientOptions> implements Client<O> {
   /**
    * @inheritDoc
    */
-  public recordDroppedEvent(reason: EventDropReason, category: DataCategory): void {
+  public recordDroppedEvent(
+    reason: EventDropReason,
+    category: DataCategory,
+  ): void {
     if (this._options.sendClientReports) {
       // We want to track each category (error, transaction, session) separately
       // but still keep the distinction between different type of outcomes.
@@ -354,7 +390,8 @@ export abstract class BaseClient<O extends ClientOptions> implements Client<O> {
     // 1. Session with non terminal status and 0 errors + an error occurred -> Will set error count to 1 and send update
     // 2. Session with non terminal status and 1 error + a crash occurred -> Will set status crashed and send update
     const sessionNonTerminal = session.status === 'ok';
-    const shouldUpdateAndSend = (sessionNonTerminal && session.errors === 0) || (sessionNonTerminal && crashed);
+    const shouldUpdateAndSend = (sessionNonTerminal && session.errors === 0) ||
+      (sessionNonTerminal && crashed);
 
     if (shouldUpdateAndSend) {
       updateSession(session, {
@@ -376,7 +413,7 @@ export abstract class BaseClient<O extends ClientOptions> implements Client<O> {
    * `false` otherwise
    */
   protected _isClientDoneProcessing(timeout?: number): PromiseLike<boolean> {
-    return new SyncPromise(resolve => {
+    return new SyncPromise((resolve) => {
       let ticked: number = 0;
       const tick: number = 1;
 
@@ -414,8 +451,13 @@ export abstract class BaseClient<O extends ClientOptions> implements Client<O> {
    * @param scope A scope containing event metadata.
    * @returns A new event with more information.
    */
-  protected _prepareEvent(event: Event, hint: EventHint, scope?: Scope): PromiseLike<Event | null> {
-    const { normalizeDepth = 3, normalizeMaxBreadth = 1_000 } = this.getOptions();
+  protected _prepareEvent(
+    event: Event,
+    hint: EventHint,
+    scope?: Scope,
+  ): PromiseLike<Event | null> {
+    const { normalizeDepth = 3, normalizeMaxBreadth = 1_000 } = this
+      .getOptions();
     const prepared: Event = {
       ...event,
       event_id: event.event_id || hint.event_id || uuid4(),
@@ -439,7 +481,10 @@ export abstract class BaseClient<O extends ClientOptions> implements Client<O> {
     // {@link Hub.addEventProcessor} gets the finished prepared event.
     if (finalScope) {
       // Collect attachments from the hint and scope
-      const attachments = [...(hint.attachments || []), ...finalScope.getAttachments()];
+      const attachments = [
+        ...(hint.attachments || []),
+        ...finalScope.getAttachments(),
+      ];
 
       if (attachments.length) {
         hint.attachments = attachments;
@@ -449,7 +494,7 @@ export abstract class BaseClient<O extends ClientOptions> implements Client<O> {
       result = finalScope.applyToEvent(prepared, hint);
     }
 
-    return result.then(evt => {
+    return result.then((evt) => {
       if (typeof normalizeDepth === 'number' && normalizeDepth > 0) {
         return this._normalizeEvent(evt, normalizeDepth, normalizeMaxBreadth);
       }
@@ -467,7 +512,11 @@ export abstract class BaseClient<O extends ClientOptions> implements Client<O> {
    * @param event Event
    * @returns Normalized event
    */
-  protected _normalizeEvent(event: Event | null, depth: number, maxBreadth: number): Event | null {
+  protected _normalizeEvent(
+    event: Event | null,
+    depth: number,
+    maxBreadth: number,
+  ): Event | null {
     if (!event) {
       return null;
     }
@@ -475,7 +524,7 @@ export abstract class BaseClient<O extends ClientOptions> implements Client<O> {
     const normalized: Event = {
       ...event,
       ...(event.breadcrumbs && {
-        breadcrumbs: event.breadcrumbs.map(b => ({
+        breadcrumbs: event.breadcrumbs.map((b) => ({
           ...b,
           ...(b.data && {
             data: normalize(b.data, depth, maxBreadth),
@@ -505,13 +554,17 @@ export abstract class BaseClient<O extends ClientOptions> implements Client<O> {
 
       // event.contexts.trace.data may contain circular/dangerous data so we need to normalize it
       if (event.contexts.trace.data) {
-        normalized.contexts.trace.data = normalize(event.contexts.trace.data, depth, maxBreadth);
+        normalized.contexts.trace.data = normalize(
+          event.contexts.trace.data,
+          depth,
+          maxBreadth,
+        );
       }
     }
 
     // event.spans[].data may contain circular/dangerous data so we need to normalize it
     if (event.spans) {
-      normalized.spans = event.spans.map(span => {
+      normalized.spans = event.spans.map((span) => {
         // We cannot use the spread operator here because `toJSON` on `span` is non-enumerable
         if (span.data) {
           span.data = normalize(span.data, depth, maxBreadth);
@@ -549,7 +602,8 @@ export abstract class BaseClient<O extends ClientOptions> implements Client<O> {
       event.message = truncate(event.message, maxValueLength);
     }
 
-    const exception = event.exception && event.exception.values && event.exception.values[0];
+    const exception = event.exception && event.exception.values &&
+      event.exception.values[0];
     if (exception && exception.value) {
       exception.value = truncate(exception.value, maxValueLength);
     }
@@ -568,7 +622,10 @@ export abstract class BaseClient<O extends ClientOptions> implements Client<O> {
     const integrationsArray = Object.keys(this._integrations);
     if (integrationsArray.length > 0) {
       event.sdk = event.sdk || {};
-      event.sdk.integrations = [...(event.sdk.integrations || []), ...integrationsArray];
+      event.sdk.integrations = [
+        ...(event.sdk.integrations || []),
+        ...integrationsArray,
+      ];
     }
   }
 
@@ -578,12 +635,16 @@ export abstract class BaseClient<O extends ClientOptions> implements Client<O> {
    * @param hint
    * @param scope
    */
-  protected _captureEvent(event: Event, hint: EventHint = {}, scope?: Scope): PromiseLike<string | undefined> {
+  protected _captureEvent(
+    event: Event,
+    hint: EventHint = {},
+    scope?: Scope,
+  ): PromiseLike<string | undefined> {
     return this._processEvent(event, hint, scope).then(
-      finalEvent => {
+      (finalEvent) => {
         return finalEvent.event_id;
       },
-      reason => {
+      (reason) => {
         true && logger.warn(reason);
         return undefined;
       },
@@ -597,24 +658,32 @@ export abstract class BaseClient<O extends ClientOptions> implements Client<O> {
    * platform specific meta data (such as the User's IP address) must be added
    * by the SDK implementor.
    *
-   *
    * @param event The event to send to Sentry.
    * @param hint May contain additional information about the original exception.
    * @param scope A scope containing event metadata.
    * @returns A SyncPromise that resolves with the event or rejects in case event was/will not be send.
    */
-  protected _processEvent(event: Event, hint: EventHint, scope?: Scope): PromiseLike<Event> {
+  protected _processEvent(
+    event: Event,
+    hint: EventHint,
+    scope?: Scope,
+  ): PromiseLike<Event> {
     const { beforeSend, sampleRate } = this.getOptions();
 
     if (!this._isEnabled()) {
-      return rejectedSyncPromise(new SentryError('SDK not enabled, will not capture event.'));
+      return rejectedSyncPromise(
+        new SentryError('SDK not enabled, will not capture event.'),
+      );
     }
 
     const isTransaction = event.type === 'transaction';
     // 1.0 === 100% events are sent
     // 0.0 === 0% events are sent
     // Sampling for transaction happens somewhere else
-    if (!isTransaction && typeof sampleRate === 'number' && Math.random() > sampleRate) {
+    if (
+      !isTransaction && typeof sampleRate === 'number' &&
+      Math.random() > sampleRate
+    ) {
       this.recordDroppedEvent('sample_rate', 'error');
       return rejectedSyncPromise(
         new SentryError(
@@ -624,13 +693,16 @@ export abstract class BaseClient<O extends ClientOptions> implements Client<O> {
     }
 
     return this._prepareEvent(event, hint, scope)
-      .then(prepared => {
+      .then((prepared) => {
         if (prepared === null) {
           this.recordDroppedEvent('event_processor', event.type || 'error');
-          throw new SentryError('An event processor returned null, will not send event.');
+          throw new SentryError(
+            'An event processor returned null, will not send event.',
+          );
         }
 
-        const isInternalException = hint.data && (hint.data as { __sentry__: boolean }).__sentry__ === true;
+        const isInternalException = hint.data &&
+          (hint.data as { __sentry__: boolean }).__sentry__ === true;
         if (isInternalException || isTransaction || !beforeSend) {
           return prepared;
         }
@@ -638,10 +710,12 @@ export abstract class BaseClient<O extends ClientOptions> implements Client<O> {
         const beforeSendResult = beforeSend(prepared, hint);
         return _ensureBeforeSendRv(beforeSendResult);
       })
-      .then(processedEvent => {
+      .then((processedEvent) => {
         if (processedEvent === null) {
           this.recordDroppedEvent('before_send', event.type || 'error');
-          throw new SentryError('`beforeSend` returned `null`, will not send event.');
+          throw new SentryError(
+            '`beforeSend` returned `null`, will not send event.',
+          );
         }
 
         const session = scope && scope.getSession();
@@ -652,7 +726,7 @@ export abstract class BaseClient<O extends ClientOptions> implements Client<O> {
         this.sendEvent(processedEvent, hint);
         return processedEvent;
       })
-      .then(null, reason => {
+      .then(null, (reason) => {
         if (reason instanceof SentryError) {
           throw reason;
         }
@@ -675,11 +749,11 @@ export abstract class BaseClient<O extends ClientOptions> implements Client<O> {
   protected _process<T>(promise: PromiseLike<T>): void {
     this._numProcessing += 1;
     void promise.then(
-      value => {
+      (value) => {
         this._numProcessing -= 1;
         return value;
       },
-      reason => {
+      (reason) => {
         this._numProcessing -= 1;
         return reason;
       },
@@ -691,7 +765,7 @@ export abstract class BaseClient<O extends ClientOptions> implements Client<O> {
    */
   protected _sendEnvelope(envelope: Envelope): void {
     if (this._transport && this._dsn) {
-      this._transport.send(envelope).then(null, reason => {
+      this._transport.send(envelope).then(null, (reason) => {
         true && logger.error('Error while sending event:', reason);
       });
     } else {
@@ -705,8 +779,11 @@ export abstract class BaseClient<O extends ClientOptions> implements Client<O> {
   protected _clearOutcomes(): Outcome[] {
     const outcomes = this._outcomes;
     this._outcomes = {};
-    return Object.keys(outcomes).map(key => {
-      const [reason, category] = key.split(':') as [EventDropReason, DataCategory];
+    return Object.keys(outcomes).map((key) => {
+      const [reason, category] = key.split(':') as [
+        EventDropReason,
+        DataCategory,
+      ];
       return {
         reason,
         category,
@@ -719,7 +796,10 @@ export abstract class BaseClient<O extends ClientOptions> implements Client<O> {
    * @inheritDoc
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
-  public abstract eventFromException(_exception: any, _hint?: EventHint): PromiseLike<Event>;
+  public abstract eventFromException(
+    _exception: any,
+    _hint?: EventHint,
+  ): PromiseLike<Event>;
 
   /**
    * @inheritDoc
@@ -735,17 +815,19 @@ export abstract class BaseClient<O extends ClientOptions> implements Client<O> {
 /**
  * Verifies that return value of configured `beforeSend` is of expected type.
  */
-function _ensureBeforeSendRv(rv: PromiseLike<Event | null> | Event | null): PromiseLike<Event | null> | Event | null {
+function _ensureBeforeSendRv(
+  rv: PromiseLike<Event | null> | Event | null,
+): PromiseLike<Event | null> | Event | null {
   const nullErr = '`beforeSend` method has to return `null` or a valid event.';
   if (isThenable(rv)) {
     return rv.then(
-      event => {
+      (event) => {
         if (!(isPlainObject(event) || event === null)) {
           throw new SentryError(nullErr);
         }
         return event;
       },
-      e => {
+      (e) => {
         throw new SentryError(`beforeSend rejected with ${e}`);
       },
     );

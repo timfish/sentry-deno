@@ -1,6 +1,12 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 import { captureException, withScope } from '../core/mod.ts';
-import { DsnLike, Event as SentryEvent, Mechanism, Scope, WrappedFunction } from '../types/mod.ts';
+import {
+  DsnLike,
+  Event as SentryEvent,
+  Mechanism,
+  Scope,
+  WrappedFunction,
+} from '../types/mod.ts';
 import {
   addExceptionMechanism,
   addExceptionTypeValue,
@@ -138,7 +144,10 @@ export function wrap(
 
   // Restore original function name (not all browsers allow that)
   try {
-    const descriptor = Object.getOwnPropertyDescriptor(sentryWrapped, 'name') as PropertyDescriptor;
+    const descriptor = Object.getOwnPropertyDescriptor(
+      sentryWrapped,
+      'name',
+    ) as PropertyDescriptor;
     if (descriptor.configurable) {
       Object.defineProperty(sentryWrapped, 'name', {
         get(): string {

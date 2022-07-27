@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 /* eslint-disable deprecation/deprecation */
 import { Severity, SeverityLevel } from '../types/mod.ts';
 
@@ -12,7 +12,14 @@ import { Severity, SeverityLevel } from '../types/mod.ts';
 // create a circular dependency between `@sentry/types` and `@sentry/utils` (also not good). So a TODO accompanying the
 // type, reminding anyone who changes it to change this list also, will have to do.
 
-export const validSeverityLevels = ['fatal', 'error', 'warning', 'log', 'info', 'debug'];
+export const validSeverityLevels = [
+  'fatal',
+  'error',
+  'warning',
+  'log',
+  'info',
+  'debug',
+];
 
 /**
  * Converts a string-based level into a member of the deprecated {@link Severity} enum.
@@ -22,7 +29,9 @@ export const validSeverityLevels = ['fatal', 'error', 'warning', 'log', 'info', 
  * @param level String representation of Severity
  * @returns Severity
  */
-export function severityFromString(level: Severity | SeverityLevel | string): Severity {
+export function severityFromString(
+  level: Severity | SeverityLevel | string,
+): Severity {
   return severityLevelFromString(level) as Severity;
 }
 
@@ -32,6 +41,12 @@ export function severityFromString(level: Severity | SeverityLevel | string): Se
  * @param level String representation of desired `SeverityLevel`.
  * @returns The `SeverityLevel` corresponding to the given string, or 'log' if the string isn't a valid level.
  */
-export function severityLevelFromString(level: SeverityLevel | string): SeverityLevel {
-  return (level === 'warn' ? 'warning' : validSeverityLevels.includes(level) ? level : 'log') as SeverityLevel;
+export function severityLevelFromString(
+  level: SeverityLevel | string,
+): SeverityLevel {
+  return (level === 'warn'
+    ? 'warning'
+    : validSeverityLevels.includes(level)
+    ? level
+    : 'log') as SeverityLevel;
 }

@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 import { StackFrame } from './stackframe.ts';
 
 /** JSDoc */

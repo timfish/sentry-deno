@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 // Slightly modified (no IE8 support, ES6) and transcribed to TypeScript
 // https://raw.githubusercontent.com/calvinmetcalf/rollup-plugin-node-builtins/master/src/es6/path.js
 
@@ -34,7 +34,8 @@ function normalizeArray(parts: string[], allowAboveRoot?: boolean): string[] {
 
 // Split a filename into [root, dir, basename, ext], unix version
 // 'root' is just a slash, or nothing.
-const splitPathRe = /^(\/?|)([\s\S]*?)((?:\.{1,2}|[^/]+?|)(\.[^./]*|))(?:[/]*)$/;
+const splitPathRe =
+  /^(\/?|)([\s\S]*?)((?:\.{1,2}|[^/]+?|)(\.[^./]*|))(?:[/]*)$/;
 /** JSDoc */
 function splitPath(filename: string): string[] {
   const parts = splitPathRe.exec(filename);
@@ -65,7 +66,7 @@ export function resolve(...args: string[]): string {
 
   // Normalize the path
   resolvedPath = normalizeArray(
-    resolvedPath.split('/').filter(p => !!p),
+    resolvedPath.split('/').filter((p) => !!p),
     !resolvedAbsolute,
   ).join('/');
 
@@ -134,7 +135,7 @@ export function normalizePath(path: string): string {
 
   // Normalize the path
   let normalizedPath = normalizeArray(
-    path.split('/').filter(p => !!p),
+    path.split('/').filter((p) => !!p),
     !isPathAbsolute,
   ).join('/');
 

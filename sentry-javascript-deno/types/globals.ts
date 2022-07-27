@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 /*
  * This file adds variables to the global namespace when it's loaded. We do this in order to be able to use flags and
  * constants to facilitate tree shaking for users without having to import them, since the imports can confuse some
@@ -12,7 +12,6 @@
  */
 
 declare global {
-  
 }
 
 // We need this empty export because of --isolatedModules

@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 import { DataCategory } from './datacategory.ts';
 
 export type EventDropReason =

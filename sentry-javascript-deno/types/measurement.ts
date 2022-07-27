@@ -1,11 +1,19 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 // Based on https://getsentry.github.io/relay/relay_metrics/enum.MetricUnit.html
 // For more details, see measurement key in https://develop.sentry.dev/sdk/event-payloads/transaction/
 
 /**
  * A time duration.
  */
-export type DurationUnit = 'nanosecond' | 'microsecond' | 'millisecond' | 'second' | 'minute' | 'hour' | 'day' | 'week';
+export type DurationUnit =
+  | 'nanosecond'
+  | 'microsecond'
+  | 'millisecond'
+  | 'second'
+  | 'minute'
+  | 'hour'
+  | 'day'
+  | 'week';
 
 /**
  * Size of information derived from bytes.
@@ -39,6 +47,11 @@ export type NoneUnit = '' | 'none';
 // allowing for arbitrary strings as custom units (user-defined units without builtin conversion or default).
 type LiteralUnion<T extends string> = T | Omit<T, T>;
 
-export type MeasurementUnit = LiteralUnion<DurationUnit | InformationUnit | FractionUnit | NoneUnit>;
+export type MeasurementUnit = LiteralUnion<
+  DurationUnit | InformationUnit | FractionUnit | NoneUnit
+>;
 
-export type Measurements = Record<string, { value: number; unit: MeasurementUnit }>;
+export type Measurements = Record<
+  string,
+  { value: number; unit: MeasurementUnit }
+>;

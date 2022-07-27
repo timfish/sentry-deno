@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 import { EventProcessor } from './eventprocessor.ts';
 import { Hub } from './hub.ts';
 
@@ -23,5 +23,8 @@ export interface Integration {
    * Sets the integration up only once.
    * This takes no options on purpose, options should be passed in the constructor
    */
-  setupOnce(addGlobalEventProcessor: (callback: EventProcessor) => void, getCurrentHub: () => Hub): void;
+  setupOnce(
+    addGlobalEventProcessor: (callback: EventProcessor) => void,
+    getCurrentHub: () => Hub,
+  ): void;
 }

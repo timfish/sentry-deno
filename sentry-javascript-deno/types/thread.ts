@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 import { Stacktrace } from './stacktrace.ts';
 
 /** JSDoc */

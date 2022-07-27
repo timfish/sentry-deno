@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 import { Attachment } from './attachment.ts';
 import { Breadcrumb } from './breadcrumb.ts';
 import { Contexts } from './context.ts';

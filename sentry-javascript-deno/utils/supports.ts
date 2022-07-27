@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 import { getGlobalObject } from './global.ts';
 import { logger } from './logger.ts';
 
@@ -75,7 +75,8 @@ export function supportsFetch(): boolean {
  */
 // eslint-disable-next-line @typescript-eslint/ban-types
 export function isNativeFetch(func: Function): boolean {
-  return func && /^function fetch\(\)\s+\{\s+\[native code\]\s+\}$/.test(func.toString());
+  return func &&
+    /^function fetch\(\)\s+\{\s+\[native code\]\s+\}$/.test(func.toString());
 }
 
 /**
@@ -114,7 +115,10 @@ export function supportsNativeFetch(): boolean {
       doc.head.removeChild(sandbox);
     } catch (err) {
       true &&
-        logger.warn('Could not create sandbox iframe for pure fetch check, bailing to window.fetch: ', err);
+        logger.warn(
+          'Could not create sandbox iframe for pure fetch check, bailing to window.fetch: ',
+          err,
+        );
     }
   }
 
@@ -173,7 +177,8 @@ export function supportsany(): boolean {
   const chrome = (global as any).chrome;
   const isChromePackagedApp = chrome && chrome.app && chrome.app.runtime;
   /* eslint-enable @typescript-eslint/no-unsafe-member-access */
-  const hasanyApi = 'history' in global && !!global.history.pushState && !!global.history.replaceState;
+  const hasanyApi = 'history' in global && !!global.history.pushState &&
+    !!global.history.replaceState;
 
   return !isChromePackagedApp && hasanyApi;
 }

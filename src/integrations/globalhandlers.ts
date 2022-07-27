@@ -1,22 +1,22 @@
-import { getCurrentHub } from "../../sentry-javascript-deno/core/mod.ts";
+import { getCurrentHub } from '../../sentry-javascript-deno/core/mod.ts';
 import {
   Event,
   EventHint,
   Hub,
   Integration,
   StackParser,
-} from "../../sentry-javascript-deno/types/mod.ts";
+} from '../../sentry-javascript-deno/types/mod.ts';
 import {
   addExceptionMechanism,
   getLocationHref,
   isString,
-} from "../../sentry-javascript-deno/utils/mod.ts";
+} from '../../sentry-javascript-deno/utils/mod.ts';
 
-import { DenoClient } from "../client.ts";
-import { eventFromUnknownInput } from "../eventbuilder.ts";
-import { flush } from "../mod.ts";
+import { DenoClient } from '../client.ts';
+import { eventFromUnknownInput } from '../eventbuilder.ts';
+import { flush } from '../mod.ts';
 
-type GlobalHandlersIntegrationsOptionKeys = "error"; // | "onunhandledrejection";
+type GlobalHandlersIntegrationsOptionKeys = 'error'; // | "onunhandledrejection";
 
 /** JSDoc */
 type GlobalHandlersIntegrations = Record<
@@ -29,7 +29,7 @@ export class GlobalHandlers implements Integration {
   /**
    * @inheritDoc
    */
-  public static id = "GlobalHandlers";
+  public static id = 'GlobalHandlers';
 
   /**
    * @inheritDoc
@@ -81,7 +81,7 @@ export class GlobalHandlers implements Integration {
 }
 
 function _installGlobalErrorHandler(): void {
-  addEventListener("error", (data) => {
+  addEventListener('error', (data) => {
     const [hub, stackParser] = getHubAndOptions();
     const { message, filename, lineno, colno, error } = data;
 
@@ -92,9 +92,9 @@ function _installGlobalErrorHandler(): void {
       colno,
     );
 
-    event.level = "error";
+    event.level = 'error';
 
-    addMechanismAndCapture(hub, error, event, "error");
+    addMechanismAndCapture(hub, error, event, 'error');
 
     // Stop the app from exiting for now
     data.preventDefault();
@@ -135,7 +135,7 @@ function _enhanceEventWithInitialFrame(
     ev0sf.push({
       colno,
       filename,
-      function: "?",
+      function: '?',
       in_app: true,
       lineno,
     });
@@ -146,7 +146,7 @@ function _enhanceEventWithInitialFrame(
 
 function addMechanismAndCapture(
   hub: Hub,
-  error: EventHint["originalException"],
+  error: EventHint['originalException'],
   event: Event,
   type: string,
 ): void {

@@ -3,13 +3,13 @@
 Experimental Sentry client for Deno
 
 ```ts
-import { init } from "https://cdn.jsdelivr.net/gh/timfish/sentry-deno@master/mod.ts";
+import { init } from 'https://cdn.jsdelivr.net/gh/timfish/sentry-deno@master/mod.ts';
 
 init({
-  dsn: "__YOUR_DSN__",
+  dsn: '__YOUR_DSN__',
 });
 
-throw new Error("Something happened");
+throw new Error('Something happened');
 ```
 
 You will need to run Deno with `--allow-net` to allow events to be sent to

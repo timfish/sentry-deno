@@ -1,28 +1,31 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 export type { ClientClass } from './sdk.ts';
 
 export {
   addBreadcrumb,
-  captureException,
+  addGlobalEventProcessor,
   captureEvent,
+  captureException,
   captureMessage,
   configureScope,
-  startTransaction,
+  getCurrentHub,
+  getHubFromCarrier,
+  Hub,
+  makeMain,
+  Scope,
   setContext,
   setExtra,
   setExtras,
   setTag,
   setTags,
   setUser,
+  startTransaction,
   withScope,
-  addGlobalEventProcessor,
-  getCurrentHub,
-  getHubFromCarrier,
-  Hub,
-  makeMain,
-  Scope,
 } from '../hub/mod.ts';
-export { getEnvelopeEndpointWithUrlEncodedAuth, getReportDialogEndpoint } from './api.ts';
+export {
+  getEnvelopeEndpointWithUrlEncodedAuth,
+  getReportDialogEndpoint,
+} from './api.ts';
 export { BaseClient } from './baseclient.ts';
 export { initAndBind } from './sdk.ts';
 export { createTransport } from './transports/base.ts';

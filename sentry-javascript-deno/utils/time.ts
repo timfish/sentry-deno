@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 import { getGlobalObject } from './global.ts';
 import { dynamicRequire, isNodeEnv } from './node.ts';
 
@@ -82,7 +82,9 @@ function getBrowserPerformance(): Performance | undefined {
  */
 function getNodePerformance(): Performance | undefined {
   try {
-    const perfHooks = dynamicRequire(undefined, 'perf_hooks') as { performance: Performance };
+    const perfHooks = dynamicRequire(undefined, 'perf_hooks') as {
+      performance: Performance;
+    };
     return perfHooks.performance;
   } catch (_) {
     return undefined;
@@ -92,19 +94,22 @@ function getNodePerformance(): Performance | undefined {
 /**
  * The Performance API implementation for the current platform, if available.
  */
-const platformPerformance: Performance | undefined = isNodeEnv() ? getNodePerformance() : getBrowserPerformance();
+const platformPerformance: Performance | undefined = isNodeEnv()
+  ? getNodePerformance()
+  : getBrowserPerformance();
 
-const timestampSource: TimestampSource =
-  platformPerformance === undefined
-    ? dateTimestampSource
-    : {
-        nowSeconds: () => (platformPerformance.timeOrigin + platformPerformance.now()) / 1000,
-      };
+const timestampSource: TimestampSource = platformPerformance === undefined
+  ? dateTimestampSource
+  : {
+    nowSeconds: () =>
+      (platformPerformance.timeOrigin + platformPerformance.now()) / 1000,
+  };
 
 /**
  * Returns a timestamp in seconds since the UNIX epoch using the Date API.
  */
-export const dateTimestampInSeconds: () => number = dateTimestampSource.nowSeconds.bind(dateTimestampSource);
+export const dateTimestampInSeconds: () => number = dateTimestampSource
+  .nowSeconds.bind(dateTimestampSource);
 
 /**
  * Returns a timestamp in seconds since the UNIX epoch using either the Performance or Date APIs, depending on the
@@ -117,7 +122,9 @@ export const dateTimestampInSeconds: () => number = dateTimestampSource.nowSecon
  * skew can grow to arbitrary amounts like days, weeks or months.
  * See https://github.com/getsentry/sentry-javascript/issues/2590.
  */
-export const timestampInSeconds: () => number = timestampSource.nowSeconds.bind(timestampSource);
+export const timestampInSeconds: () => number = timestampSource.nowSeconds.bind(
+  timestampSource,
+);
 
 // Re-exported with an old name for backwards-compatibility.
 export const timestampWithMs = timestampInSeconds;
@@ -163,10 +170,13 @@ export const browserPerformanceTimeOrigin = ((): number | undefined => {
   // a valid fallback. In the absence of an initial time provided by the browser, fallback to the current time from the
   // Date API.
   // eslint-disable-next-line deprecation/deprecation
-  const navigationStart = performance.timing && performance.timing.navigationStart;
+  const navigationStart = performance.timing &&
+    performance.timing.navigationStart;
   const hasNavigationStart = typeof navigationStart === 'number';
   // if navigationStart isn't available set delta to threshold so it isn't used
-  const navigationStartDelta = hasNavigationStart ? Math.abs(navigationStart + performanceNow - dateNow) : threshold;
+  const navigationStartDelta = hasNavigationStart
+    ? Math.abs(navigationStart + performanceNow - dateNow)
+    : threshold;
   const navigationStartIsReliable = navigationStartDelta < threshold;
 
   if (timeOriginIsReliable || navigationStartIsReliable) {

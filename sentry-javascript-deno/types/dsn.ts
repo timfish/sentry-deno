@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 /** Supported Sentry transport protocols in a Dsn. */
 export type DsnProtocol = 'http' | 'https';
 

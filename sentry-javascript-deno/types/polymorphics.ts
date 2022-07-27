@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 /**
  * Event-like interface that's usable in browser and node.
  *

@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 /* eslint-disable max-lines */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/ban-types */
@@ -35,7 +35,9 @@ export type InstrumentHandlerCallback = (data: any) => void;
  *  - UnhandledRejection API
  */
 
-const handlers: { [key in InstrumentHandlerType]?: InstrumentHandlerCallback[] } = {};
+const handlers: {
+  [key in InstrumentHandlerType]?: InstrumentHandlerCallback[];
+} = {};
 const instrumented: { [key in InstrumentHandlerType]?: boolean } = {};
 
 /** Instruments given API */
@@ -79,7 +81,10 @@ function instrument(type: InstrumentHandlerType): void {
  * Use at your own risk, this might break without changelog notice, only used internally.
  * @hidden
  */
-export function addInstrumentationHandler(type: InstrumentHandlerType, callback: InstrumentHandlerCallback): void {
+export function addInstrumentationHandler(
+  type: InstrumentHandlerType,
+  callback: InstrumentHandlerCallback,
+): void {
   handlers[type] = handlers[type] || [];
   (handlers[type] as InstrumentHandlerCallback[]).push(callback);
   instrument(type);
@@ -97,7 +102,9 @@ function triggerHandlers(type: InstrumentHandlerType, data: any): void {
     } catch (e) {
       true &&
         logger.error(
-          `Error while triggering instrumentation handler.\nType: ${type}\nName: ${getFunctionName(handler)}\nError:`,
+          `Error while triggering instrumentation handler.\nType: ${type}\nName: ${
+            getFunctionName(handler)
+          }\nError:`,
           e,
         );
     }
@@ -115,16 +122,20 @@ function instrumentConsole(): void {
       return;
     }
 
-    fill(global.console, level, function (originalConsoleMethod: () => any): Function {
-      return function (...args: any): void {
-        triggerHandlers('console', { args, level });
+    fill(
+      global.console,
+      level,
+      function (originalConsoleMethod: () => any): Function {
+        return function (...args: any): void {
+          triggerHandlers('console', { args, level });
 
-        // this fails for some browsers. :(
-        if (originalConsoleMethod) {
-          originalConsoleMethod.apply(global.console, args);
-        }
-      };
-    });
+          // this fails for some browsers. :(
+          if (originalConsoleMethod) {
+            originalConsoleMethod.apply(global.console, args);
+          }
+        };
+      },
+    );
   });
 }
 
@@ -175,7 +186,13 @@ function instrumentFetch(): void {
   });
 }
 
-type XHRSendInput = null | Blob | BufferSource | FormData | URLSearchParams | string;
+type XHRSendInput =
+  | null
+  | Blob
+  | BufferSource
+  | FormData
+  | URLSearchParams
+  | string;
 
 /** JSDoc */
 interface SentryWrappedXMLHttpRequest extends Window {
@@ -191,7 +208,10 @@ interface SentryWrappedXMLHttpRequest extends Window {
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /** Extract `method` from fetch call arguments */
 function getFetchMethod(fetchArgs: any[] = []): string {
-  if ('Request' in global && isInstanceOf(fetchArgs[0], Request) && fetchArgs[0].method) {
+  if (
+    'Request' in global && isInstanceOf(fetchArgs[0], Request) &&
+    fetchArgs[0].method
+  ) {
     return String(fetchArgs[0].method).toUpperCase();
   }
   if (fetchArgs[1] && fetchArgs[1].method) {
@@ -225,15 +245,18 @@ function instrumentXHR(): void {
       // eslint-disable-next-line @typescript-eslint/no-this-alias
       const xhr = this;
       const url = args[1];
-      const xhrInfo: SentryWrappedXMLHttpRequest['__sentry_xhr__'] = (xhr.__sentry_xhr__ = {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        method: isString(args[0]) ? args[0].toUpperCase() : args[0],
-        url: args[1],
-      });
+      const xhrInfo: SentryWrappedXMLHttpRequest['__sentry_xhr__'] =
+        (xhr.__sentry_xhr__ = {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          method: isString(args[0]) ? args[0].toUpperCase() : args[0],
+          url: args[1],
+        });
 
       // if Sentry key appears in URL, don't capture it as a request
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      if (isString(url) && xhrInfo.method === 'POST' && url.match(/sentry_key/)) {
+      if (
+        isString(url) && xhrInfo.method === 'POST' && url.match(/sentry_key/)
+      ) {
         xhr.__sentry_own_request__ = true;
       }
 
@@ -256,13 +279,20 @@ function instrumentXHR(): void {
         }
       };
 
-      if ('onreadystatechange' in xhr && typeof xhr.onreadystatechange === 'function') {
-        fill(xhr, 'onreadystatechange', function (original: WrappedFunction): Function {
-          return function (...readyStateArgs: any[]): void {
-            onreadystatechangeHandler();
-            return original.apply(xhr, readyStateArgs);
-          };
-        });
+      if (
+        'onreadystatechange' in xhr &&
+        typeof xhr.onreadystatechange === 'function'
+      ) {
+        fill(
+          xhr,
+          'onreadystatechange',
+          function (original: WrappedFunction): Function {
+            return function (...readyStateArgs: any[]): void {
+              onreadystatechangeHandler();
+              return original.apply(xhr, readyStateArgs);
+            };
+          },
+        );
       } else {
         xhr.addEventListener('readystatechange', onreadystatechangeHandler);
       }
@@ -319,7 +349,9 @@ function instrumentany(): void {
   };
 
   /** @hidden */
-  function historyReplacementFunction(originalanyFunction: () => void): () => void {
+  function historyReplacementFunction(
+    originalanyFunction: () => void,
+  ): () => void {
     return function (this: any, ...args: any): void {
       const url = args.length > 2 ? args[2] : undefined;
       if (url) {
@@ -350,7 +382,10 @@ let lastCapturedEvent: Event | undefined;
  * @param previous previously captured event
  * @param current event to be captured
  */
-function shouldShortcircuitPreviousDebounce(previous: Event | undefined, current: Event): boolean {
+function shouldShortcircuitPreviousDebounce(
+  previous: Event | undefined,
+  current: Event,
+): boolean {
   // If there was no previous event, it should always be swapped for the new one.
   if (!previous) {
     return true;
@@ -397,7 +432,10 @@ function shouldSkipDOMEvent(event: Event): boolean {
 
     // Only consider keypress events on actual input elements. This will disregard keypresses targeting body
     // e.g.tabbing through elements, hotkeys, etc.
-    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+    if (
+      target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' ||
+      target.isContentEditable
+    ) {
       return false;
     }
   } catch (e) {
@@ -415,7 +453,10 @@ function shouldSkipDOMEvent(event: Event): boolean {
  * @returns wrapped breadcrumb events handler
  * @hidden
  */
-function makeDOMEventHandler(handler: Function, globalListener: boolean = false): (event: Event) => void {
+function makeDOMEventHandler(
+  handler: Function,
+  globalListener: boolean = false,
+): (event: Event) => void {
   return (event: Event): void => {
     // It's possible this handler might trigger multiple times for the same
     // event (e.g. event propagation through node ancestors).
@@ -439,8 +480,7 @@ function makeDOMEventHandler(handler: Function, globalListener: boolean = false)
         global: globalListener,
       });
       lastCapturedEvent = event;
-    }
-    // If there is a debounce awaiting, see if the new event is different enough to treat it as a unique one.
+    } // If there is a debounce awaiting, see if the new event is different enough to treat it as a unique one.
     // If that's the case, emit the previous event and store locally the newly-captured DOM event.
     else if (shouldShortcircuitPreviousDebounce(lastCapturedEvent, event)) {
       handler({
@@ -503,44 +543,66 @@ function instrumentDOM(): void {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     const proto = (global as any)[target] && (global as any)[target].prototype;
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, no-prototype-builtins
-    if (!proto || !proto.hasOwnProperty || !proto.hasOwnProperty('addEventListener')) {
+    if (
+      !proto || !proto.hasOwnProperty ||
+      !proto.hasOwnProperty('addEventListener')
+    ) {
       return;
     }
 
-    fill(proto, 'addEventListener', function (originalAddEventListener: AddEventListener): AddEventListener {
-      return function (
-        this: any,
-        type: string,
-        listener: EventListenerOrEventListenerObject,
-        options?: boolean | AddEventListenerOptions,
-      ): AddEventListener {
-        if (type === 'click' || type == 'keypress') {
-          try {
-            const el = this as InstrumentedElement;
-            const handlers = (el.__sentry_instrumentation_handlers__ = el.__sentry_instrumentation_handlers__ || {});
-            const handlerForType = (handlers[type] = handlers[type] || { refCount: 0 });
+    fill(
+      proto,
+      'addEventListener',
+      function (originalAddEventListener: AddEventListener): AddEventListener {
+        return function (
+          this: any,
+          type: string,
+          listener: EventListenerOrEventListenerObject,
+          options?: boolean | AddEventListenerOptions,
+        ): AddEventListener {
+          if (type === 'click' || type == 'keypress') {
+            try {
+              const el = this as InstrumentedElement;
+              const handlers =
+                (el.__sentry_instrumentation_handlers__ =
+                  el.__sentry_instrumentation_handlers__ || {});
+              const handlerForType =
+                (handlers[type] = handlers[type] || { refCount: 0 });
 
-            if (!handlerForType.handler) {
-              const handler = makeDOMEventHandler(triggerDOMHandler);
-              handlerForType.handler = handler;
-              originalAddEventListener.call(this, type, handler, options) as any;
+              if (!handlerForType.handler) {
+                const handler = makeDOMEventHandler(triggerDOMHandler);
+                handlerForType.handler = handler;
+                originalAddEventListener.call(
+                  this,
+                  type,
+                  handler,
+                  options,
+                ) as any;
+              }
+
+              handlerForType.refCount += 1;
+            } catch (e) {
+              // Accessing dom properties is always fragile.
+              // Also allows us to skip `addEventListenrs` calls with no proper `this` context.
             }
-
-            handlerForType.refCount += 1;
-          } catch (e) {
-            // Accessing dom properties is always fragile.
-            // Also allows us to skip `addEventListenrs` calls with no proper `this` context.
           }
-        }
 
-        return originalAddEventListener.call(this, type, listener, options) as any;
-      };
-    });
+          return originalAddEventListener.call(
+            this,
+            type,
+            listener,
+            options,
+          ) as any;
+        };
+      },
+    );
 
     fill(
       proto,
       'removeEventListener',
-      function (originalRemoveEventListener: RemoveEventListener): RemoveEventListener {
+      function (
+        originalRemoveEventListener: RemoveEventListener,
+      ): RemoveEventListener {
         return function (
           this: any,
           type: string,
@@ -557,7 +619,12 @@ function instrumentDOM(): void {
                 handlerForType.refCount -= 1;
                 // If there are no longer any custom handlers of the current type on this element, we can remove ours, too.
                 if (handlerForType.refCount <= 0) {
-                  originalRemoveEventListener.call(this, type, handlerForType.handler, options) as any;
+                  originalRemoveEventListener.call(
+                    this,
+                    type,
+                    handlerForType.handler,
+                    options,
+                  ) as any;
                   handlerForType.handler = undefined;
                   delete handlers[type]; // eslint-disable-line @typescript-eslint/no-dynamic-delete
                 }
@@ -573,7 +640,12 @@ function instrumentDOM(): void {
             }
           }
 
-          return originalRemoveEventListener.call(this, type, listener, options) as any;
+          return originalRemoveEventListener.call(
+            this,
+            type,
+            listener,
+            options,
+          ) as any;
         };
       },
     );
@@ -585,7 +657,13 @@ let _oldOnErrorHandler: any = null;
 function instrumentError(): void {
   _oldOnErrorHandler = global.onerror;
 
-  global.onerror = function (msg: any, url: any, line: any, column: any, error: any): boolean {
+  global.onerror = function (
+    msg: any,
+    url: any,
+    line: any,
+    column: any,
+    error: any,
+  ): boolean {
     triggerHandlers('error', {
       column,
       error,
@@ -613,7 +691,10 @@ function instrumentUnhandledRejection(): void {
 
     if (_oldOnUnhandledRejectionHandler) {
       // eslint-disable-next-line prefer-rest-params
-      return _oldOnUnhandledRejectionHandler.apply(this, arguments as any) as unknown as boolean;
+      return _oldOnUnhandledRejectionHandler.apply(
+        this,
+        arguments as any,
+      ) as unknown as boolean;
     }
 
     return true;

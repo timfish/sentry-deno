@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 // This type is used in various places like Client Reports and Rate Limit Categories
 // See:
 // - https://develop.sentry.dev/sdk/rate-limiting/#definitions

@@ -1,7 +1,7 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 /**
  * Holds meta information to customize the behavior of Sentry's server-side event processing.
- **/
+ */
 export interface DebugMeta {
   images?: Array<DebugImage>;
 }

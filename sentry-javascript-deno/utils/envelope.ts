@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 import {
   Attachment,
   AttachmentItem,
@@ -16,7 +16,10 @@ import { dropUndefinedKeys } from './object.ts';
  * Make sure to always explicitly provide the generic to this function
  * so that the envelope types resolve correctly.
  */
-export function createEnvelope<E extends Envelope>(headers: E[0], items: E[1] = []): E {
+export function createEnvelope<E extends Envelope>(
+  headers: E[0],
+  items: E[1] = [],
+): E {
   return [headers, items] as E;
 }
 
@@ -25,7 +28,10 @@ export function createEnvelope<E extends Envelope>(headers: E[0], items: E[1] = 
  * Make sure to always explicitly provide the generic to this function
  * so that the envelope types resolve correctly.
  */
-export function addItemToEnvelope<E extends Envelope>(envelope: E, newItem: E[1][number]): E {
+export function addItemToEnvelope<E extends Envelope>(
+  envelope: E,
+  newItem: E[1][number],
+): E {
   const [headers, items] = envelope;
   return [headers, [...items, newItem]] as E;
 }
@@ -36,7 +42,10 @@ export function addItemToEnvelope<E extends Envelope>(envelope: E, newItem: E[1]
  */
 export function forEachEnvelopeItem<E extends Envelope>(
   envelope: Envelope,
-  callback: (envelopeItem: E[1][number], envelopeItemType: E[1][number][0]['type']) => void,
+  callback: (
+    envelopeItem: E[1][number],
+    envelopeItemType: E[1][number][0]['type'],
+  ) => void,
 ): void {
   const envelopeItems = envelope[1];
   envelopeItems.forEach((envelopeItem: EnvelopeItem) => {
@@ -45,7 +54,10 @@ export function forEachEnvelopeItem<E extends Envelope>(
   });
 }
 
-function encodeUTF8(input: string, textEncoder?: TextEncoderInternal): Uint8Array {
+function encodeUTF8(
+  input: string,
+  textEncoder?: TextEncoderInternal,
+): Uint8Array {
   const utf8 = textEncoder || new TextEncoder();
   return utf8.encode(input);
 }
@@ -53,7 +65,10 @@ function encodeUTF8(input: string, textEncoder?: TextEncoderInternal): Uint8Arra
 /**
  * Serializes an envelope.
  */
-export function serializeEnvelope(envelope: Envelope, textEncoder?: TextEncoderInternal): string | Uint8Array {
+export function serializeEnvelope(
+  envelope: Envelope,
+  textEncoder?: TextEncoderInternal,
+): string | Uint8Array {
   const [envHeaders, items] = envelope;
 
   // Initially we construct our envelope as a string and only convert to binary chunks if we encounter binary data
@@ -61,16 +76,24 @@ export function serializeEnvelope(envelope: Envelope, textEncoder?: TextEncoderI
 
   function append(next: string | Uint8Array): void {
     if (typeof parts === 'string') {
-      parts = typeof next === 'string' ? parts + next : [encodeUTF8(parts, textEncoder), next];
+      parts = typeof next === 'string'
+        ? parts + next
+        : [encodeUTF8(parts, textEncoder), next];
     } else {
-      parts.push(typeof next === 'string' ? encodeUTF8(next, textEncoder) : next);
+      parts.push(
+        typeof next === 'string' ? encodeUTF8(next, textEncoder) : next,
+      );
     }
   }
 
   for (const item of items) {
     const [itemHeaders, payload] = item as typeof items[number];
     append(`\n${JSON.stringify(itemHeaders)}\n`);
-    append(typeof payload === 'string' || payload instanceof Uint8Array ? payload : JSON.stringify(payload));
+    append(
+      typeof payload === 'string' || payload instanceof Uint8Array
+        ? payload
+        : JSON.stringify(payload),
+    );
   }
 
   return typeof parts === 'string' ? parts : concatBuffers(parts);
@@ -96,7 +119,9 @@ export function createAttachmentEnvelopeItem(
   attachment: Attachment,
   textEncoder?: TextEncoderInternal,
 ): AttachmentItem {
-  const buffer = typeof attachment.data === 'string' ? encodeUTF8(attachment.data, textEncoder) : attachment.data;
+  const buffer = typeof attachment.data === 'string'
+    ? encodeUTF8(attachment.data, textEncoder)
+    : attachment.data;
 
   return [
     dropUndefinedKeys({
@@ -123,6 +148,8 @@ const ITEM_TYPE_TO_DATA_CATEGORY_MAP: Record<EnvelopeItemType, DataCategory> = {
 /**
  * Maps the type of an envelope item to a data category.
  */
-export function envelopeItemTypeToDataCategory(type: EnvelopeItemType): DataCategory {
+export function envelopeItemTypeToDataCategory(
+  type: EnvelopeItemType,
+): DataCategory {
   return ITEM_TYPE_TO_DATA_CATEGORY_MAP[type];
 }

@@ -1,18 +1,14 @@
-import LRU from "https://deno.land/x/lru_cache@6.0.0-deno.4/mod.ts";
+import LRU from 'https://deno.land/x/lru_cache@6.0.0-deno.4/mod.ts';
 import {
   Event,
   EventProcessor,
   Integration,
   StackFrame,
-} from "../../sentry-javascript-deno/types/mod.ts";
-import { addContextToFrame } from "../../sentry-javascript-deno/utils/mod.ts";
+} from '../../sentry-javascript-deno/types/mod.ts';
+import { addContextToFrame } from '../../sentry-javascript-deno/utils/mod.ts';
 
 const FILE_CONTENT_CACHE = new LRU<string, string | null>(100);
 const DEFAULT_LINES_OF_CONTEXT = 7;
-
-function readTextFileAsync(path: string): Promise<string> {
-  return Deno.readTextFile(path);
-}
 
 /**
  * Resets the file cache. Exists for testing purposes.
@@ -20,6 +16,29 @@ function readTextFileAsync(path: string): Promise<string> {
  */
 export function resetFileContentCache(): void {
   FILE_CONTENT_CACHE.reset();
+}
+
+/**
+ * Reads file contents and caches them in a global LRU cache.
+ *
+ * @param filename filepath to read content from.
+ */
+async function readSourceFile(filename: string): Promise<string | null> {
+  const cachedFile = FILE_CONTENT_CACHE.get(filename);
+  // We have a cache hit
+  if (cachedFile !== undefined) {
+    return cachedFile;
+  }
+
+  let content: string | null = null;
+  try {
+    content = await Deno.readTextFile(filename);
+  } catch (_) {
+    //
+  }
+
+  FILE_CONTENT_CACHE.set(filename, content);
+  return content;
 }
 
 interface ContextLinesOptions {
@@ -37,7 +56,7 @@ export class ContextLines implements Integration {
   /**
    * @inheritDoc
    */
-  public static id = "ContextLines";
+  public static id = 'ContextLines';
 
   /**
    * @inheritDoc
@@ -83,16 +102,16 @@ export class ContextLines implements Integration {
       // Only add context if we have a filename and it hasn't already been added
       if (frame.filename && frame.in_app && frame.context_line === undefined) {
         const permission = await Deno.permissions.query({
-          name: "read",
+          name: 'read',
           path: frame.filename,
         });
 
-        if (permission.state == "granted") {
-          const sourceFile = await _readSourceFile(frame.filename);
+        if (permission.state == 'granted') {
+          const sourceFile = await readSourceFile(frame.filename);
 
           if (sourceFile) {
             try {
-              const lines = sourceFile.split("\n");
+              const lines = sourceFile.split('\n');
               addContextToFrame(lines, frame, contextLines);
             } catch (_) {
               // anomaly, being defensive in case
@@ -103,27 +122,4 @@ export class ContextLines implements Integration {
       }
     }
   }
-}
-
-/**
- * Reads file contents and caches them in a global LRU cache.
- *
- * @param filename filepath to read content from.
- */
-async function _readSourceFile(filename: string): Promise<string | null> {
-  const cachedFile = FILE_CONTENT_CACHE.get(filename);
-  // We have a cache hit
-  if (cachedFile !== undefined) {
-    return cachedFile;
-  }
-
-  let content: string | null = null;
-  try {
-    content = await readTextFileAsync(filename);
-  } catch (_) {
-    //
-  }
-
-  FILE_CONTENT_CACHE.set(filename, content);
-  return content;
 }

@@ -1,0 +1,177 @@
+export const snapshot = {};
+
+snapshot[`captureException 1`] = `
+{
+  contexts: {
+    app: {
+      app_start_time: "{{time}}",
+    },
+    device: {
+      arch: "{{arch}}",
+    },
+    os: {
+      name: "{{platform}}",
+    },
+    runtime: {
+      name: "Deno",
+      version: "{{version}}",
+    },
+    typescript: {
+      name: "TypeScript",
+      version: "{{version}}",
+    },
+    v8: {
+      name: "v8",
+      version: "{{version}}",
+    },
+  },
+  environment: "production",
+  event_id: "{{id}}",
+  exception: {
+    values: [
+      {
+        mechanism: {
+          handled: true,
+          type: "generic",
+        },
+        stacktrace: {
+          frames: [
+            {
+              colno: 24,
+              context_line: "  hub.captureException(something());",
+              filename: "app:///test/mod.test.ts",
+              function: "<anonymous>",
+              in_app: true,
+              lineno: 41,
+              post_context: [
+                "});",
+                "",
+                "Deno.test('captureMessage', (t) => {",
+                "  const [hub] = getTestClient((event) => {",
+                "    assertSnapshot(t, event);",
+                "  });",
+                "",
+              ],
+              pre_context: [
+                "    assertSnapshot(t, event);",
+                "  });",
+                "",
+                "  function something() {",
+                "    return new Error('Some unhandled error');",
+                "  }",
+                "",
+              ],
+            },
+            {
+              colno: 12,
+              context_line: "    return new Error('Some unhandled error');",
+              filename: "app:///test/mod.test.ts",
+              function: "something",
+              in_app: true,
+              lineno: 38,
+              post_context: [
+                "  }",
+                "",
+                "  hub.captureException(something());",
+                "});",
+                "",
+                "Deno.test('captureMessage', (t) => {",
+                "  const [hub] = getTestClient((event) => {",
+              ],
+              pre_context: [
+                "",
+                "Deno.test('captureException', (t) => {",
+                "  const [hub] = getTestClient((event) => {",
+                "    assertSnapshot(t, event);",
+                "  });",
+                "",
+                "  function something() {",
+              ],
+            },
+          ],
+        },
+        type: "Error",
+        value: "Some unhandled error",
+      },
+    ],
+  },
+  sdk: {
+    integrations: [
+      "Breadcrumbs",
+      "Dedupe",
+      "GlobalHandlers",
+      "ContextLines",
+      "TraceFetch",
+      "DenoContext",
+      "NormalizePaths",
+    ],
+    name: "sentry.javascript.deno",
+    packages: [
+      {
+        name: "npm:@sentry/core",
+        version: "{{version}}",
+      },
+    ],
+    version: "{{version}}",
+  },
+  timestamp: 0,
+  user: {
+    ip_address: "{{auto}}",
+  },
+}
+`;
+
+snapshot[`captureMessage 1`] = `
+{
+  contexts: {
+    app: {
+      app_start_time: "{{time}}",
+    },
+    device: {
+      arch: "{{arch}}",
+    },
+    os: {
+      name: "{{platform}}",
+    },
+    runtime: {
+      name: "Deno",
+      version: "{{version}}",
+    },
+    typescript: {
+      name: "TypeScript",
+      version: "{{version}}",
+    },
+    v8: {
+      name: "v8",
+      version: "{{version}}",
+    },
+  },
+  environment: "production",
+  event_id: "{{id}}",
+  level: "info",
+  message: "Some error message",
+  sdk: {
+    integrations: [
+      "Breadcrumbs",
+      "Dedupe",
+      "GlobalHandlers",
+      "ContextLines",
+      "TraceFetch",
+      "DenoContext",
+      "NormalizePaths",
+    ],
+    name: "sentry.javascript.deno",
+    packages: [
+      {
+        name: "npm:@sentry/core",
+        version: "{{version}}",
+      },
+    ],
+    version: "{{version}}",
+  },
+  timestamp: 0,
+  user: {
+    ip_address: "{{auto}}",
+  },
+}
+`;

@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 /** An error emitted by Sentry SDKs and related utilities. */
 export class SentryError extends Error {
   /** Display name of this error instance. */

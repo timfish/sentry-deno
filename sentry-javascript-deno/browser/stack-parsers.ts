@@ -1,5 +1,9 @@
-// deno-lint-ignore-file 
-import { StackFrame, StackLineParser, StackLineParserFn } from '../types/mod.ts';
+// deno-lint-ignore-file
+import {
+  StackFrame,
+  StackLineParser,
+  StackLineParserFn,
+} from '../types/mod.ts';
 import { createStackParser } from '../utils/mod.ts';
 
 // global reference to slice
@@ -11,7 +15,12 @@ const CHROME_PRIORITY = 30;
 const WINJS_PRIORITY = 40;
 const GECKO_PRIORITY = 50;
 
-function createFrame(filename: string, func: string, lineno?: number, colno?: number): StackFrame {
+function createFrame(
+  filename: string,
+  func: string,
+  lineno?: number,
+  colno?: number,
+): StackFrame {
   const frame: StackFrame = {
     filename,
     function: func,
@@ -35,7 +44,7 @@ const chromeRegex =
   /^\s*at (?:(.*?) ?\((?:address at )?)?((?:file|https?|blob|chrome-extension|address|native|eval|webpack|<anonymous>|[-a-z]+:|.*bundle|\/).*?)(?::(\d+))?(?::(\d+))?\)?\s*$/i;
 const chromeEvalRegex = /\((\S*)(?::(\d+))(?::(\d+))\)/;
 
-const chrome: StackLineParserFn = line => {
+const chrome: StackLineParserFn = (line) => {
   const parts = chromeRegex.exec(line);
 
   if (parts) {
@@ -54,9 +63,17 @@ const chrome: StackLineParserFn = line => {
 
     // Kamil: One more hack won't hurt us right? Understanding and adding more rules on top of these regexps right now
     // would be way too time consuming. (TODO: Rewrite whole RegExp to be more readable)
-    const [func, filename] = extractSafariExtensionDetails(parts[1] || UNKNOWN_FUNCTION, parts[2]);
+    const [func, filename] = extractSafariExtensionDetails(
+      parts[1] || UNKNOWN_FUNCTION,
+      parts[2],
+    );
 
-    return createFrame(filename, func, parts[3] ? +parts[3] : undefined, parts[4] ? +parts[4] : undefined);
+    return createFrame(
+      filename,
+      func,
+      parts[3] ? +parts[3] : undefined,
+      parts[4] ? +parts[4] : undefined,
+    );
   }
 
   return;
@@ -71,7 +88,7 @@ const geckoREgex =
   /^\s*(.*?)(?:\((.*?)\))?(?:^|@)?((?:file|https?|blob|chrome|webpack|resource|moz-extension|capacitor).*?:\/.*?|\[native code\]|[^@]*(?:bundle|\d+\.js)|\/[\w\-. /=]+)(?::(\d+))?(?::(\d+))?\s*$/i;
 const geckoEvalRegex = /(\S+) line (\d+)(?: > eval line \d+)* > eval/i;
 
-const gecko: StackLineParserFn = line => {
+const gecko: StackLineParserFn = (line) => {
   const parts = geckoREgex.exec(line);
 
   if (parts) {
@@ -92,7 +109,12 @@ const gecko: StackLineParserFn = line => {
     let func = parts[1] || UNKNOWN_FUNCTION;
     [func, filename] = extractSafariExtensionDetails(func, filename);
 
-    return createFrame(filename, func, parts[4] ? +parts[4] : undefined, parts[5] ? +parts[5] : undefined);
+    return createFrame(
+      filename,
+      func,
+      parts[4] ? +parts[4] : undefined,
+      parts[5] ? +parts[5] : undefined,
+    );
   }
 
   return;
@@ -103,36 +125,61 @@ export const geckoStackLineParser: StackLineParser = [GECKO_PRIORITY, gecko];
 const winjsRegex =
   /^\s*at (?:((?:\[object object\])?.+) )?\(?((?:file|ms-appx|https?|webpack|blob):.*?):(\d+)(?::(\d+))?\)?\s*$/i;
 
-const winjs: StackLineParserFn = line => {
+const winjs: StackLineParserFn = (line) => {
   const parts = winjsRegex.exec(line);
 
   return parts
-    ? createFrame(parts[2], parts[1] || UNKNOWN_FUNCTION, +parts[3], parts[4] ? +parts[4] : undefined)
+    ? createFrame(
+      parts[2],
+      parts[1] || UNKNOWN_FUNCTION,
+      +parts[3],
+      parts[4] ? +parts[4] : undefined,
+    )
     : undefined;
 };
 
 export const winjsStackLineParser: StackLineParser = [WINJS_PRIORITY, winjs];
 
-const opera10Regex = / line (\d+).*script (?:in )?(\S+)(?:: in function (\S+))?$/i;
+const opera10Regex =
+  / line (\d+).*script (?:in )?(\S+)(?:: in function (\S+))?$/i;
 
-const opera10: StackLineParserFn = line => {
+const opera10: StackLineParserFn = (line) => {
   const parts = opera10Regex.exec(line);
-  return parts ? createFrame(parts[2], parts[3] || UNKNOWN_FUNCTION, +parts[1]) : undefined;
+  return parts
+    ? createFrame(parts[2], parts[3] || UNKNOWN_FUNCTION, +parts[1])
+    : undefined;
 };
 
-export const opera10StackLineParser: StackLineParser = [OPERA10_PRIORITY, opera10];
+export const opera10StackLineParser: StackLineParser = [
+  OPERA10_PRIORITY,
+  opera10,
+];
 
 const opera11Regex =
   / line (\d+), column (\d+)\s*(?:in (?:<anonymous function: ([^>]+)>|([^)]+))\(.*\))? in (.*):\s*$/i;
 
-const opera11: StackLineParserFn = line => {
+const opera11: StackLineParserFn = (line) => {
   const parts = opera11Regex.exec(line);
-  return parts ? createFrame(parts[5], parts[3] || parts[4] || UNKNOWN_FUNCTION, +parts[1], +parts[2]) : undefined;
+  return parts
+    ? createFrame(
+      parts[5],
+      parts[3] || parts[4] || UNKNOWN_FUNCTION,
+      +parts[1],
+      +parts[2],
+    )
+    : undefined;
 };
 
-export const opera11StackLineParser: StackLineParser = [OPERA11_PRIORITY, opera11];
+export const opera11StackLineParser: StackLineParser = [
+  OPERA11_PRIORITY,
+  opera11,
+];
 
-export const defaultStackLineParsers = [chromeStackLineParser, geckoStackLineParser, winjsStackLineParser];
+export const defaultStackLineParsers = [
+  chromeStackLineParser,
+  geckoStackLineParser,
+  winjsStackLineParser,
+];
 
 export const defaultStackParser = createStackParser(...defaultStackLineParsers);
 
@@ -156,14 +203,19 @@ export const defaultStackParser = createStackParser(...defaultStackLineParsers);
  * Unfortunately "just" changing RegExp is too complicated now and making it pass all tests
  * and fix this case seems like an impossible, or at least way too time-consuming task.
  */
-const extractSafariExtensionDetails = (func: string, filename: string): [string, string] => {
+const extractSafariExtensionDetails = (
+  func: string,
+  filename: string,
+): [string, string] => {
   const isSafariExtension = func.indexOf('safari-extension') !== -1;
   const isSafariWebExtension = func.indexOf('safari-web-extension') !== -1;
 
   return isSafariExtension || isSafariWebExtension
     ? [
-        func.indexOf('@') !== -1 ? func.split('@')[0] : UNKNOWN_FUNCTION,
-        isSafariExtension ? `safari-extension:${filename}` : `safari-web-extension:${filename}`,
-      ]
+      func.indexOf('@') !== -1 ? func.split('@')[0] : UNKNOWN_FUNCTION,
+      isSafariExtension
+        ? `safari-extension:${filename}`
+        : `safari-web-extension:${filename}`,
+    ]
     : [func, filename];
 };

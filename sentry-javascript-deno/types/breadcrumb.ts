@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 import { Severity, SeverityLevel } from './severity.ts';
 
 /** JSDoc */

@@ -1,5 +1,10 @@
-// deno-lint-ignore-file 
-import { StackFrame, StackLineParser, StackLineParserFn, StackParser } from '../types/mod.ts';
+// deno-lint-ignore-file
+import {
+  StackFrame,
+  StackLineParser,
+  StackLineParserFn,
+  StackParser,
+} from '../types/mod.ts';
 
 const STACKTRACE_LIMIT = 50;
 
@@ -8,10 +13,9 @@ const STACKTRACE_LIMIT = 50;
  *
  * StackFrames are returned in the correct order for Sentry Exception
  * frames and with Sentry SDK internal frames removed from the top and bottom
- *
  */
 export function createStackParser(...parsers: StackLineParser[]): StackParser {
-  const sortedParsers = parsers.sort((a, b) => a[0] - b[0]).map(p => p[1]);
+  const sortedParsers = parsers.sort((a, b) => a[0] - b[0]).map((p) => p[1]);
 
   return (stack: string, skipFirst: number = 0): StackFrame[] => {
     const frames: StackFrame[] = [];
@@ -37,7 +41,9 @@ export function createStackParser(...parsers: StackLineParser[]): StackParser {
  *
  * If options contains an array of line parsers, it is converted into a parser
  */
-export function stackParserFromStackParserOptions(stackParser: StackParser | StackLineParser[]): StackParser {
+export function stackParserFromStackParserOptions(
+  stackParser: StackParser | StackLineParser[],
+): StackParser {
   if (Array.isArray(stackParser)) {
     return createStackParser(...stackParser);
   }
@@ -58,7 +64,10 @@ export function stripSentryFramesAndReverse(stack: StackFrame[]): StackFrame[] {
   const lastFrameFunction = localStack[localStack.length - 1].function || '';
 
   // If stack starts with one of our API calls, remove it (starts, meaning it's the top of the stack - aka last call)
-  if (firstFrameFunction.indexOf('captureMessage') !== -1 || firstFrameFunction.indexOf('captureException') !== -1) {
+  if (
+    firstFrameFunction.indexOf('captureMessage') !== -1 ||
+    firstFrameFunction.indexOf('captureException') !== -1
+  ) {
     localStack = localStack.slice(1);
   }
 
@@ -70,7 +79,7 @@ export function stripSentryFramesAndReverse(stack: StackFrame[]): StackFrame[] {
   // The frame where the crash happened, should be the last entry in the array
   return localStack
     .slice(0, STACKTRACE_LIMIT)
-    .map(frame => ({
+    .map((frame) => ({
       ...frame,
       filename: frame.filename || localStack[0].filename,
       function: frame.function || '?',
@@ -101,7 +110,8 @@ type GetModuleFn = (filename: string | undefined) => string | undefined;
 // eslint-disable-next-line complexity
 function node(getModule?: GetModuleFn): StackLineParserFn {
   const FILENAME_MATCH = /^\s*[-]{4,}$/;
-  const FULL_MATCH = /at (?:async )?(?:(.+?)\s+\()?(?:(.+?):(\d+)(?::(\d+))?|([^)]+))\)?/;
+  const FULL_MATCH =
+    /at (?:async )?(?:(.+?)\s+\()?(?:(.+?):(\d+)(?::(\d+))?|([^)]+))\)?/;
 
   // eslint-disable-next-line complexity
   return (line: string) => {
@@ -158,15 +168,19 @@ function node(getModule?: GetModuleFn): StackLineParserFn {
       functionName = typeName ? `${typeName}.${methodName}` : methodName;
     }
 
-    const filename = lineMatch[2]?.startsWith('file://') ? lineMatch[2].substr(7) : lineMatch[2];
+    const filename = lineMatch[2]?.startsWith('file://')
+      ? lineMatch[2].substr(7)
+      : lineMatch[2];
     const isNative = lineMatch[5] === 'native';
-    const isInternal =
-      isNative || (filename && !filename.startsWith('/') && !filename.startsWith('.') && filename.indexOf(':\\') !== 1);
+    const isInternal = isNative ||
+      (filename && !filename.startsWith('/') && !filename.startsWith('.') &&
+        filename.indexOf(':\\') !== 1);
 
     // in_app is all that's not an internal Node function or a module within node_modules
     // note that isNative appears to return true even for node core libraries
     // see https://github.com/getsentry/raven-node/issues/176
-    const in_app = !isInternal && filename !== undefined && !filename.includes('node_modules/');
+    const in_app = !isInternal && filename !== undefined &&
+      !filename.includes('node_modules/');
 
     return {
       filename,

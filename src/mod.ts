@@ -1,23 +1,40 @@
-import { Options } from "../sentry-javascript-deno/types/mod.ts";
+import { Options } from '../sentry-javascript-deno/types/mod.ts';
 import {
   getCurrentHub,
   initAndBind,
-} from "../sentry-javascript-deno/core/mod.ts";
-import { Breadcrumbs, Dedupe } from "../sentry-javascript-deno/browser/mod.ts";
-import { getIntegrationsToSetup } from "../sentry-javascript-deno/core/mod.ts";
+} from '../sentry-javascript-deno/core/mod.ts';
+import {
+  Breadcrumbs,
+  ContextLines,
+  Dedupe,
+  DenoContext,
+  GlobalHandlers,
+  NormalizePaths,
+  TraceFetch,
+} from './integrations/mod.ts';
+import { getIntegrationsToSetup } from '../sentry-javascript-deno/core/mod.ts';
 import {
   createStackParser,
   nodeStackLineParser,
-} from "../sentry-javascript-deno/utils/mod.ts";
+} from '../sentry-javascript-deno/utils/mod.ts';
+import { DenoClient } from './client.ts';
+import { DenoTransportOptions, makeFetchTransport } from './transport.ts';
 
-import { DenoClient } from "./client.ts";
-import { DenoTransportOptions, makeFetchTransport } from "./transport.ts";
-import { DenoContext } from "./integrations/context.ts";
-import { GlobalHandlers } from "./integrations/globalhandlers.ts";
-import { ContextLines } from "./integrations/context-lines.ts";
-import { NormalizePaths } from "./integrations/normalize.ts";
+export * from './exports.ts';
+export * from './integrations/mod.ts';
+export { DenoClient } from './client.ts';
 
-export * from "./exports.ts";
+export const defaultIntegrations = [
+  // These are straight form the browser SDK
+  new Breadcrumbs({ xhr: false, history: false, dom: false }),
+  new Dedupe(),
+  // These are custom Deno integrations
+  new GlobalHandlers(),
+  new ContextLines(),
+  new TraceFetch(),
+  new DenoContext(),
+  new NormalizePaths(),
+];
 
 // deno-lint-ignore no-empty-interface
 export interface DenoOptions extends Options<DenoTransportOptions> {}
@@ -29,14 +46,7 @@ export function init(options: DenoOptions = {}) {
   }
 
   if (options.defaultIntegrations == undefined) {
-    options.defaultIntegrations = [
-      new GlobalHandlers(),
-      new ContextLines(),
-      new Breadcrumbs({ xhr: false, history: false, dom: false }),
-      new DenoContext(),
-      new NormalizePaths(),
-      new Dedupe(),
-    ];
+    options.defaultIntegrations = defaultIntegrations;
   }
 
   const clientOptions = {

@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 import { isRegExp, isString } from './is.ts';
 
 /**
@@ -89,7 +89,10 @@ export function safeJoin(input: any[], delimiter?: string): string {
  * @param value The string value to be checked against
  * @param pattern Either a regex or a string that must be contained in value
  */
-export function isMatchingPattern(value: string, pattern: RegExp | string): boolean {
+export function isMatchingPattern(
+  value: string,
+  pattern: RegExp | string,
+): boolean {
   if (!isString(value)) {
     return false;
   }
@@ -117,5 +120,8 @@ export function isMatchingPattern(value: string, pattern: RegExp | string): bool
 export function escapeStringForRegex(regexString: string): string {
   // escape the hyphen separately so we can also replace it with a unicode literal hyphen, to avoid the problems
   // discussed in https://github.com/sindresorhus/escape-string-regexp/issues/20.
-  return regexString.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&').replace(/-/g, '\\x2d');
+  return regexString.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&').replace(
+    /-/g,
+    '\\x2d',
+  );
 }

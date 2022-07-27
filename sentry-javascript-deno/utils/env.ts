@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 /*
  * This module exists for optimizations in the build process through rollup and terser.  We define some global
  * constants, which can be overridden during build. By guarding certain pieces of code with functions that return these
@@ -22,5 +22,6 @@ declare const __SENTRY_BROWSER_BUNDLE__: boolean | undefined;
  * @returns true if this is a browser bundle build.
  */
 export function isBrowserBundle(): boolean {
-  return typeof __SENTRY_BROWSER_BUNDLE__ !== 'undefined' && !!__SENTRY_BROWSER_BUNDLE__;
+  return typeof __SENTRY_BROWSER_BUNDLE__ !== 'undefined' &&
+    !!__SENTRY_BROWSER_BUNDLE__;
 }

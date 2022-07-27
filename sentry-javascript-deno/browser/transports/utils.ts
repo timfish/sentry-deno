@@ -1,5 +1,10 @@
-// deno-lint-ignore-file 
-import { getGlobalObject, isNativeFetch, logger, supportsFetch } from '../../utils/mod.ts';
+// deno-lint-ignore-file
+import {
+  getGlobalObject,
+  isNativeFetch,
+  logger,
+  supportsFetch,
+} from '../../utils/mod.ts';
 
 const global = getGlobalObject<Window>();
 let cachedFetchImpl: FetchImpl;
@@ -71,7 +76,10 @@ export function getNativeFetchImplementation(): FetchImpl {
       document.head.removeChild(sandbox);
     } catch (e) {
       true &&
-        logger.warn('Could not create sandbox iframe for pure fetch check, bailing to window.fetch: ', e);
+        logger.warn(
+          'Could not create sandbox iframe for pure fetch check, bailing to window.fetch: ',
+          e,
+        );
     }
   }
 
@@ -86,8 +94,11 @@ export function getNativeFetchImplementation(): FetchImpl {
  * @param body report payload
  */
 export function sendReport(url: string, body: string | Uint8Array): void {
-  const isRealNavigator = Object.prototype.toString.call(global && global.navigator) as any === '[object Navigator]';
-  const hasSendBeacon = isRealNavigator && typeof global.navigator.sendBeacon === 'function';
+  const isRealNavigator =
+    Object.prototype.toString.call(global && global.navigator) as any ===
+      '[object Navigator]';
+  const hasSendBeacon = isRealNavigator &&
+    typeof global.navigator.sendBeacon === 'function';
 
   if (hasSendBeacon) {
     // Prevent illegal invocations - https://xgwang.me/posts/you-may-not-know-beacon/#it-may-throw-error%2C-be-sure-to-catch
@@ -100,7 +111,7 @@ export function sendReport(url: string, body: string | Uint8Array): void {
       method: 'POST',
       credentials: 'omit',
       keepalive: true,
-    }).then(null, error => {
+    }).then(null, (error) => {
       true && logger.error(error);
     });
   }

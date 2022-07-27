@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 export * from './exports.ts';
 
 import { Integrations as CoreIntegrations } from '../core/mod.ts';

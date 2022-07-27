@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 import { QueryParams } from './request.ts';
 
 /**
@@ -63,6 +63,13 @@ export interface WorkerLocation {
   toString(): string;
 }
 
-export type Primitive = number | string | boolean | bigint | symbol | null | undefined;
+export type Primitive =
+  | number
+  | string
+  | boolean
+  | bigint
+  | symbol
+  | null
+  | undefined;
 
 export type HttpHeaderValue = string | string[] | number | null;

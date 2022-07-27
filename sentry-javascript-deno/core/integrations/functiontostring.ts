@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 import { Integration, WrappedFunction } from '../../types/mod.ts';
 import { getOriginalFunction } from '../../utils/mod.ts';
 
@@ -24,7 +24,10 @@ export class FunctionToString implements Integration {
     originalFunctionToString = Function.prototype.toString;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    Function.prototype.toString = function (this: WrappedFunction, ...args: any): string {
+    Function.prototype.toString = function (
+      this: WrappedFunction,
+      ...args: any
+    ): string {
       const context = getOriginalFunction(this) || this;
       return originalFunctionToString.apply(context, args) as any;
     };

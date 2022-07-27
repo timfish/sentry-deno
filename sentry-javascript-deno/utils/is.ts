@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 
@@ -145,7 +145,8 @@ export function isThenable(wat: any): wat is PromiseLike<any> {
  * @returns A boolean representing the result.
  */
 export function isSyntheticEvent(wat: unknown): boolean {
-  return isPlainObject(wat) && 'nativeEvent' in wat && 'preventDefault' in wat && 'stopPropagation' in wat;
+  return isPlainObject(wat) && 'nativeEvent' in wat &&
+    'preventDefault' in wat && 'stopPropagation' in wat;
 }
 
 /**

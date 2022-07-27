@@ -21,4 +21,4 @@ export {
   setUser,
   startTransaction,
   withScope,
-} from "../sentry-javascript-deno/core/mod.ts";
+} from '../sentry-javascript-deno/core/mod.ts';

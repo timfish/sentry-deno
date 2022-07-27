@@ -1,7 +1,14 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { getCurrentHub } from '../../core/mod.ts';
-import { Event, EventHint, Hub, Integration, Primitive, StackParser } from '../../types/mod.ts';
+import {
+  Event,
+  EventHint,
+  Hub,
+  Integration,
+  Primitive,
+  StackParser,
+} from '../../types/mod.ts';
 import {
   addExceptionMechanism,
   addInstrumentationHandler,
@@ -19,7 +26,10 @@ import { shouldIgnoreOnError } from '../helpers.ts';
 type GlobalHandlersIntegrationsOptionKeys = 'onerror' | 'onunhandledrejection';
 
 /** JSDoc */
-type GlobalHandlersIntegrations = Record<GlobalHandlersIntegrationsOptionKeys, boolean>;
+type GlobalHandlersIntegrations = Record<
+  GlobalHandlersIntegrationsOptionKeys,
+  boolean
+>;
 
 /** Global handlers */
 export class GlobalHandlers implements Integration {
@@ -40,7 +50,10 @@ export class GlobalHandlers implements Integration {
    * Stores references functions to installing handlers. Will set to undefined
    * after they have been run so that they are not used twice.
    */
-  private _installFunc: Record<GlobalHandlersIntegrationsOptionKeys, (() => void) | undefined> = {
+  private _installFunc: Record<
+    GlobalHandlersIntegrationsOptionKeys,
+    (() => void) | undefined
+  > = {
     onerror: _installGlobalOnErrorHandler,
     onunhandledrejection: _installGlobalOnUnhandledRejectionHandler,
   };
@@ -57,18 +70,19 @@ export class GlobalHandlers implements Integration {
    * @inheritDoc
    */
   public setupOnce(): void {
-    
     const options = this._options;
 
     // We can disable guard-for-in as we construct the options object above + do checks against
     // `this._installFunc` for the property.
     // eslint-disable-next-line guard-for-in
     for (const key in options) {
-      const installFunc = this._installFunc[key as GlobalHandlersIntegrationsOptionKeys];
+      const installFunc =
+        this._installFunc[key as GlobalHandlersIntegrationsOptionKeys];
       if (installFunc && options[key as GlobalHandlersIntegrationsOptionKeys]) {
         globalHandlerLog(key);
         installFunc();
-        this._installFunc[key as GlobalHandlersIntegrationsOptionKeys] = undefined;
+        this._installFunc[key as GlobalHandlersIntegrationsOptionKeys] =
+          undefined;
       }
     }
   }
@@ -89,15 +103,20 @@ function _installGlobalOnErrorHandler(): void {
         return;
       }
 
-      const event =
-        error === undefined && isString(msg)
-          ? _eventFromIncompleteOnError(msg, url, line, column)
-          : _enhanceEventWithInitialFrame(
-              eventFromUnknownInput(stackParser, error || msg, undefined, attachStacktrace, false),
-              url,
-              line,
-              column,
-            );
+      const event = error === undefined && isString(msg)
+        ? _eventFromIncompleteOnError(msg, url, line, column)
+        : _enhanceEventWithInitialFrame(
+          eventFromUnknownInput(
+            stackParser,
+            error || msg,
+            undefined,
+            attachStacktrace,
+            false,
+          ),
+          url,
+          line,
+          column,
+        );
 
       event.level = 'error';
 
@@ -124,8 +143,7 @@ function _installGlobalOnUnhandledRejectionHandler(): void {
         // see https://developer.mozilla.org/en-US/docs/Web/API/PromiseRejectionEvent
         if ('reason' in e) {
           error = e.reason;
-        }
-        // something, somewhere, (likely a browser extension) effectively casts PromiseRejectionEvents
+        } // something, somewhere, (likely a browser extension) effectively casts PromiseRejectionEvents
         // to CustomEvents, moving the `promise` and `reason` attributes of the PRE into
         // the CustomEvent's `detail` attribute, since they're not part of CustomEvent's spec
         // see https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent and
@@ -143,7 +161,13 @@ function _installGlobalOnUnhandledRejectionHandler(): void {
 
       const event = isPrimitive(error)
         ? _eventFromRejectionWithPrimitive(error)
-        : eventFromUnknownInput(stackParser, error, undefined, attachStacktrace, true);
+        : eventFromUnknownInput(
+          stackParser,
+          error,
+          undefined,
+          attachStacktrace,
+          true,
+        );
 
       event.level = 'error';
 
@@ -166,7 +190,9 @@ function _eventFromRejectionWithPrimitive(reason: Primitive): Event {
         {
           type: 'UnhandledRejection',
           // String() is needed because the Primitive type includes symbols (which can't be automatically stringified)
-          value: `Non-Error promise rejection captured with value: ${String(reason)}`,
+          value: `Non-Error promise rejection captured with value: ${
+            String(reason)
+          }`,
         },
       ],
     },
@@ -177,7 +203,12 @@ function _eventFromRejectionWithPrimitive(reason: Primitive): Event {
  * This function creates a stack from an old, error-less onerror handler.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function _eventFromIncompleteOnError(msg: any, url: any, line: any, column: any): Event {
+function _eventFromIncompleteOnError(
+  msg: any,
+  url: any,
+  line: any,
+  column: any,
+): Event {
   const ERROR_TYPES_RE =
     /^(?:[Uu]ncaught (?:exception: )?)?(?:((?:Eval|Internal|Range|Reference|Syntax|Type|URI|)Error): )?(.*)$/i;
 
@@ -207,7 +238,12 @@ function _eventFromIncompleteOnError(msg: any, url: any, line: any, column: any)
 
 /** JSDoc */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function _enhanceEventWithInitialFrame(event: Event, url: any, line: any, column: any): Event {
+function _enhanceEventWithInitialFrame(
+  event: Event,
+  url: any,
+  line: any,
+  column: any,
+): Event {
   // event.exception
   const e = (event.exception = event.exception || {});
   // event.exception.values
@@ -241,7 +277,12 @@ function globalHandlerLog(type: string): void {
   true && logger.log(`Global Handler attached: ${type}`);
 }
 
-function addMechanismAndCapture(hub: Hub, error: EventHint['originalException'], event: Event, type: string): void {
+function addMechanismAndCapture(
+  hub: Hub,
+  error: EventHint['originalException'],
+  event: Event,
+  type: string,
+): void {
   addExceptionMechanism(event, {
     handled: false,
     type,

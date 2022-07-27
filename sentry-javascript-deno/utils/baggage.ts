@@ -1,5 +1,10 @@
-// deno-lint-ignore-file 
-import { Baggage, BaggageObj, HttpHeaderValue, TraceparentData } from '../types/mod.ts';
+// deno-lint-ignore-file
+import {
+  Baggage,
+  BaggageObj,
+  HttpHeaderValue,
+  TraceparentData,
+} from '../types/mod.ts';
 
 import { isString } from './is.ts';
 import { logger } from './logger.ts';
@@ -18,17 +23,28 @@ export const SENTRY_BAGGAGE_KEY_PREFIX_REGEX = /^sentry-/;
 export const MAX_BAGGAGE_STRING_LENGTH = 8192;
 
 /** Create an instance of Baggage */
-export function createBaggage(initItems: BaggageObj, baggageString: string = '', mutable: boolean = true): Baggage {
+export function createBaggage(
+  initItems: BaggageObj,
+  baggageString: string = '',
+  mutable: boolean = true,
+): Baggage {
   return [{ ...initItems }, baggageString, mutable];
 }
 
 /** Get a value from baggage */
-export function getBaggageValue(baggage: Baggage, key: keyof BaggageObj): BaggageObj[keyof BaggageObj] {
+export function getBaggageValue(
+  baggage: Baggage,
+  key: keyof BaggageObj,
+): BaggageObj[keyof BaggageObj] {
   return baggage[0][key];
 }
 
 /** Add a value to baggage */
-export function setBaggageValue(baggage: Baggage, key: keyof BaggageObj, value: BaggageObj[keyof BaggageObj]): void {
+export function setBaggageValue(
+  baggage: Baggage,
+  key: keyof BaggageObj,
+  value: BaggageObj[keyof BaggageObj],
+): void {
   if (isBaggageMutable(baggage)) {
     baggage[0][key] = value;
   }
@@ -73,11 +89,15 @@ export function setBaggageImmutable(baggage: Baggage): void {
 export function serializeBaggage(baggage: Baggage): string {
   return Object.keys(baggage[0]).reduce((prev, key: keyof BaggageObj) => {
     const val = baggage[0][key] as string;
-    const baggageEntry = `${SENTRY_BAGGAGE_KEY_PREFIX}${encodeURIComponent(key)}=${encodeURIComponent(val)}`;
+    const baggageEntry = `${SENTRY_BAGGAGE_KEY_PREFIX}${
+      encodeURIComponent(key)
+    }=${encodeURIComponent(val)}`;
     const newVal = prev === '' ? baggageEntry : `${prev},${baggageEntry}`;
     if (newVal.length > MAX_BAGGAGE_STRING_LENGTH) {
       true &&
-        logger.warn(`Not adding key: ${key} with val: ${val} to baggage due to exceeding baggage size limits.`);
+        logger.warn(
+          `Not adding key: ${key} with val: ${val} to baggage due to exceeding baggage size limits.`,
+        );
       return prev;
     } else {
       return newVal;
@@ -98,7 +118,10 @@ export function parseBaggageHeader(
 ): Baggage {
   // Adding this check here because we got reports of this function failing due to the input value
   // not being a string. This debug log might help us determine what's going on here.
-  if ((!Array.isArray(inputBaggageValue) && !isString(inputBaggageValue)) || typeof inputBaggageValue === 'number') {
+  if (
+    (!Array.isArray(inputBaggageValue) && !isString(inputBaggageValue)) ||
+    typeof inputBaggageValue === 'number'
+  ) {
     true &&
       logger.warn(
         '[parseBaggageHeader] Received input value of incompatible type: ',
@@ -110,10 +133,17 @@ export function parseBaggageHeader(
     return createBaggage({}, '');
   }
 
-  const baggageEntries = (isString(inputBaggageValue) ? inputBaggageValue : inputBaggageValue.join(','))
-    .split(',')
-    .map(entry => entry.trim())
-    .filter(entry => entry !== '' && (includeThirdPartyEntries || SENTRY_BAGGAGE_KEY_PREFIX_REGEX.test(entry)));
+  const baggageEntries =
+    (isString(inputBaggageValue)
+      ? inputBaggageValue
+      : inputBaggageValue.join(','))
+      .split(',')
+      .map((entry) => entry.trim())
+      .filter((entry) =>
+        entry !== '' &&
+        (includeThirdPartyEntries ||
+          SENTRY_BAGGAGE_KEY_PREFIX_REGEX.test(entry))
+      );
 
   return baggageEntries.reduce(
     ([baggageObj, baggageString], curr) => {
@@ -129,7 +159,11 @@ export function parseBaggageHeader(
           true,
         ];
       } else {
-        return [baggageObj, baggageString === '' ? curr : `${baggageString},${curr}`, true];
+        return [
+          baggageObj,
+          baggageString === '' ? curr : `${baggageString},${curr}`,
+          true,
+        ];
       }
     },
     [{}, '', true],
@@ -151,15 +185,23 @@ export function parseBaggageHeader(
  *
  * @return a merged and serialized baggage string to be propagated with the outgoing request
  */
-export function mergeAndSerializeBaggage(incomingBaggage?: Baggage, thirdPartyBaggageHeader?: HttpHeaderValue): string {
+export function mergeAndSerializeBaggage(
+  incomingBaggage?: Baggage,
+  thirdPartyBaggageHeader?: HttpHeaderValue,
+): string {
   if (!incomingBaggage && !thirdPartyBaggageHeader) {
     return '';
   }
 
-  const headerBaggage = (thirdPartyBaggageHeader && parseBaggageHeader(thirdPartyBaggageHeader, true)) || undefined;
-  const thirdPartyHeaderBaggage = headerBaggage && getThirdPartyBaggage(headerBaggage);
+  const headerBaggage = (thirdPartyBaggageHeader &&
+    parseBaggageHeader(thirdPartyBaggageHeader, true)) || undefined;
+  const thirdPartyHeaderBaggage = headerBaggage &&
+    getThirdPartyBaggage(headerBaggage);
 
-  const finalBaggage = createBaggage((incomingBaggage && incomingBaggage[0]) || {}, thirdPartyHeaderBaggage || '');
+  const finalBaggage = createBaggage(
+    (incomingBaggage && incomingBaggage[0]) || {},
+    thirdPartyHeaderBaggage || '',
+  );
   return serializeBaggage(finalBaggage);
 }
 
@@ -191,7 +233,8 @@ export function parseBaggageSetMutability(
   // but if smoething like this would ever happen, we should revisit this and determine
   // what this would actually mean for the trace (i.e. is this SDK the head?, what happened
   // before that we don't have a sentry-trace header?, etc)
-  (sentryTraceHeader || !isSentryBaggageEmpty(baggage)) && setBaggageImmutable(baggage);
+  (sentryTraceHeader || !isSentryBaggageEmpty(baggage)) &&
+    setBaggageImmutable(baggage);
 
   return baggage;
 }

@@ -1,6 +1,13 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 import { addGlobalEventProcessor, getCurrentHub } from '../../core/mod.ts';
-import { Event, EventHint, Exception, ExtendedError, Integration, StackParser } from '../../types/mod.ts';
+import {
+  Event,
+  EventHint,
+  Exception,
+  ExtendedError,
+  Integration,
+  StackParser,
+} from '../../types/mod.ts';
 import { isInstanceOf } from '../../utils/mod.ts';
 
 import { BrowserClient } from '../client.ts';
@@ -54,7 +61,15 @@ export class LinkedErrors implements Integration {
     }
     addGlobalEventProcessor((event: Event, hint?: EventHint) => {
       const self = getCurrentHub().getIntegration(LinkedErrors);
-      return self ? _handler(client.getOptions().stackParser, self._key, self._limit, event, hint) : event;
+      return self
+        ? _handler(
+          client.getOptions().stackParser,
+          self._key,
+          self._limit,
+          event,
+          hint,
+        )
+        : event;
     });
   }
 }
@@ -69,10 +84,18 @@ export function _handler(
   event: Event,
   hint?: EventHint,
 ): Event | null {
-  if (!event.exception || !event.exception.values || !hint || !isInstanceOf(hint.originalException, Error)) {
+  if (
+    !event.exception || !event.exception.values || !hint ||
+    !isInstanceOf(hint.originalException, Error)
+  ) {
     return event;
   }
-  const linkedErrors = _walkErrorTree(parser, limit, hint.originalException as ExtendedError, key);
+  const linkedErrors = _walkErrorTree(
+    parser,
+    limit,
+    hint.originalException as ExtendedError,
+    key,
+  );
   event.exception.values = [...linkedErrors, ...event.exception.values];
   return event;
 }

@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 import { Primitive } from './misc.ts';
 import { Transaction } from './transaction.ts';
 
@@ -134,7 +134,13 @@ export interface Span extends SpanContext {
    * Also the `sampled` decision will be inherited.
    */
   startChild(
-    spanContext?: Pick<SpanContext, Exclude<keyof SpanContext, 'spanId' | 'sampled' | 'traceId' | 'parentSpanId'>>,
+    spanContext?: Pick<
+      SpanContext,
+      Exclude<
+        keyof SpanContext,
+        'spanId' | 'sampled' | 'traceId' | 'parentSpanId'
+      >
+    >,
   ): Span;
 
   /**

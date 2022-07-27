@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 /* eslint-disable max-lines */
 import {
   Breadcrumb,
@@ -100,7 +100,11 @@ export class Hub implements HubInterface {
    * @param scope bound to the hub.
    * @param version number, higher number means higher priority.
    */
-  public constructor(client?: Client, scope: Scope = new Scope(), private readonly _version: number = API_VERSION) {
+  public constructor(
+    client?: Client,
+    scope: Scope = new Scope(),
+    private readonly _version: number = API_VERSION,
+  ) {
     this.getStackTop().scope = scope;
     if (client) {
       this.bindClient(client);
@@ -185,7 +189,8 @@ export class Hub implements HubInterface {
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
   public captureException(exception: any, hint?: EventHint): string {
-    const eventId = (this._lastEventId = hint && hint.event_id ? hint.event_id : uuid4());
+    const eventId =
+      (this._lastEventId = hint && hint.event_id ? hint.event_id : uuid4());
     const syntheticException = new Error('Sentry syntheticException');
     this._withClient((client, scope) => {
       client.captureException(
@@ -211,7 +216,8 @@ export class Hub implements HubInterface {
     level?: Severity | SeverityLevel,
     hint?: EventHint,
   ): string {
-    const eventId = (this._lastEventId = hint && hint.event_id ? hint.event_id : uuid4());
+    const eventId =
+      (this._lastEventId = hint && hint.event_id ? hint.event_id : uuid4());
     const syntheticException = new Error(message);
     this._withClient((client, scope) => {
       client.captureMessage(
@@ -268,7 +274,9 @@ export class Hub implements HubInterface {
     const timestamp = dateTimestampInSeconds();
     const mergedBreadcrumb = { timestamp, ...breadcrumb };
     const finalBreadcrumb = beforeBreadcrumb
-      ? (consoleSandbox(() => beforeBreadcrumb(mergedBreadcrumb, hint)) as Breadcrumb | null)
+      ? (consoleSandbox(() => beforeBreadcrumb(mergedBreadcrumb, hint)) as
+        | Breadcrumb
+        | null)
       : mergedBreadcrumb;
 
     if (finalBreadcrumb === null) return;
@@ -320,7 +328,10 @@ export class Hub implements HubInterface {
    * @inheritDoc
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public setContext(name: string, context: { [key: string]: any } | null): void {
+  public setContext(
+    name: string,
+    context: { [key: string]: any } | null,
+  ): void {
     const scope = this.getScope();
     if (scope) scope.setContext(name, context);
   }
@@ -350,13 +361,18 @@ export class Hub implements HubInterface {
   /**
    * @inheritDoc
    */
-  public getIntegration<T extends Integration>(integration: IntegrationClass<T>): T | null {
+  public getIntegration<T extends Integration>(
+    integration: IntegrationClass<T>,
+  ): T | null {
     const client = this.getClient();
     if (!client) return null;
     try {
       return client.getIntegration(integration);
     } catch (_oO) {
-      true && logger.warn(`Cannot retrieve integration ${integration.id} from the current Hub`);
+      true &&
+        logger.warn(
+          `Cannot retrieve integration ${integration.id} from the current Hub`,
+        );
       return null;
     }
   }
@@ -364,8 +380,15 @@ export class Hub implements HubInterface {
   /**
    * @inheritDoc
    */
-  public startTransaction(context: TransactionContext, customSamplingContext?: CustomSamplingContext): Transaction {
-    return this._callExtensionMethod('startTransaction', context, customSamplingContext);
+  public startTransaction(
+    context: TransactionContext,
+    customSamplingContext?: CustomSamplingContext,
+  ): Transaction {
+    return this._callExtensionMethod(
+      'startTransaction',
+      context,
+      customSamplingContext,
+    );
   }
 
   /**
@@ -471,7 +494,9 @@ export class Hub implements HubInterface {
    * @param method The method to call on the client.
    * @param args Arguments to pass to the client function.
    */
-  private _withClient(callback: (client: Client, scope: Scope | undefined) => void): void {
+  private _withClient(
+    callback: (client: Client, scope: Scope | undefined) => void,
+  ): void {
     const { scope, client } = this.getStackTop();
     if (client) {
       callback(client, scope);
@@ -486,10 +511,16 @@ export class Hub implements HubInterface {
   private _callExtensionMethod<T>(method: string, ...args: any): T {
     const carrier = getMainCarrier();
     const sentry = carrier.__SENTRY__;
-    if (sentry && sentry.extensions && typeof sentry.extensions[method] === 'function') {
+    if (
+      sentry && sentry.extensions &&
+      typeof sentry.extensions[method] === 'function'
+    ) {
       return sentry.extensions[method].apply(this, args);
     }
-    true && logger.warn(`Extension method ${method} couldn't be found, doing nothing.`);
+    true &&
+      logger.warn(
+        `Extension method ${method} couldn't be found, doing nothing.`,
+      );
   }
 }
 
@@ -499,7 +530,7 @@ export class Hub implements HubInterface {
  * FIXME: This function is problematic, because despite always returning a valid Carrier,
  * it has an optional `__SENTRY__` property, which then in turn requires us to always perform an unnecessary check
  * at the call-site. We always access the carrier through this function, so we can guarantee that `__SENTRY__` is there.
- **/
+ */
 export function getMainCarrier(): Carrier {
   const carrier = getGlobalObject();
   carrier.__SENTRY__ = carrier.__SENTRY__ || {
@@ -533,7 +564,10 @@ export function getCurrentHub(): Hub {
   const registry = getMainCarrier();
 
   // If there's no hub, or its an old API, assign a new one
-  if (!hasHubOnCarrier(registry) || getHubFromCarrier(registry).isOlderThan(API_VERSION)) {
+  if (
+    !hasHubOnCarrier(registry) ||
+    getHubFromCarrier(registry).isOlderThan(API_VERSION)
+  ) {
     setHubOnCarrier(registry, new Hub());
   }
 
@@ -552,7 +586,8 @@ export function getCurrentHub(): Hub {
 function getHubFromActiveDomain(registry: Carrier): Hub {
   try {
     const sentry = getMainCarrier().__SENTRY__;
-    const activeDomain = sentry && sentry.extensions && sentry.extensions.domain && sentry.extensions.domain.active;
+    const activeDomain = sentry && sentry.extensions &&
+      sentry.extensions.domain && sentry.extensions.domain.active;
 
     // If there's no active domain, just return global hub
     if (!activeDomain) {
@@ -560,9 +595,18 @@ function getHubFromActiveDomain(registry: Carrier): Hub {
     }
 
     // If there's no hub on current domain, or it's an old API, assign a new one
-    if (!hasHubOnCarrier(activeDomain) || getHubFromCarrier(activeDomain).isOlderThan(API_VERSION)) {
+    if (
+      !hasHubOnCarrier(activeDomain) ||
+      getHubFromCarrier(activeDomain).isOlderThan(API_VERSION)
+    ) {
       const registryHubTopStack = getHubFromCarrier(registry).getStackTop();
-      setHubOnCarrier(activeDomain, new Hub(registryHubTopStack.client, Scope.clone(registryHubTopStack.scope)));
+      setHubOnCarrier(
+        activeDomain,
+        new Hub(
+          registryHubTopStack.client,
+          Scope.clone(registryHubTopStack.scope),
+        ),
+      );
     }
 
     // Return hub that lives on a domain

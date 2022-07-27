@@ -1,5 +1,10 @@
-// deno-lint-ignore-file 
-import { ClientOptions, DsnComponents, DsnLike, SdkInfo } from '../types/mod.ts';
+// deno-lint-ignore-file
+import {
+  ClientOptions,
+  DsnComponents,
+  DsnLike,
+  SdkInfo,
+} from '../types/mod.ts';
 import { dsnToString, makeDsn, urlEncode } from '../utils/mod.ts';
 
 const SENTRY_API_VERSION = '7';
@@ -8,7 +13,9 @@ const SENTRY_API_VERSION = '7';
 function getBaseApiEndpoint(dsn: DsnComponents): string {
   const protocol = dsn.protocol ? `${dsn.protocol}:` : '';
   const port = dsn.port ? `:${dsn.port}` : '';
-  return `${protocol}//${dsn.host}${port}${dsn.path ? `/${dsn.path}` : ''}/api/`;
+  return `${protocol}//${dsn.host}${port}${
+    dsn.path ? `/${dsn.path}` : ''
+  }/api/`;
 }
 
 /** Returns the ingest API endpoint for target. */
@@ -17,7 +24,10 @@ function _getIngestEndpoint(dsn: DsnComponents): string {
 }
 
 /** Returns a URL-encoded string with auth config suitable for a query string. */
-function _encodedAuth(dsn: DsnComponents, sdkInfo: SdkInfo | undefined): string {
+function _encodedAuth(
+  dsn: DsnComponents,
+  sdkInfo: SdkInfo | undefined,
+): string {
   return urlEncode({
     // We send only the minimum set of required information. See
     // https://github.com/getsentry/sentry-javascript/issues/2572.
@@ -42,11 +52,17 @@ export function getEnvelopeEndpointWithUrlEncodedAuth(
   // const { tunnel, _metadata = {} } = options;
   // return tunnel ? tunnel : `${_getIngestEndpoint(dsn)}?${_encodedAuth(dsn, _metadata.sdk)}`;
 
-  const tunnel = typeof tunnelOrOptions === 'string' ? tunnelOrOptions : tunnelOrOptions.tunnel;
+  const tunnel = typeof tunnelOrOptions === 'string'
+    ? tunnelOrOptions
+    : tunnelOrOptions.tunnel;
   const sdkInfo =
-    typeof tunnelOrOptions === 'string' || !tunnelOrOptions._metadata ? undefined : tunnelOrOptions._metadata.sdk;
+    typeof tunnelOrOptions === 'string' || !tunnelOrOptions._metadata
+      ? undefined
+      : tunnelOrOptions._metadata.sdk;
 
-  return tunnel ? tunnel : `${_getIngestEndpoint(dsn)}?${_encodedAuth(dsn, sdkInfo)}`;
+  return tunnel
+    ? tunnel
+    : `${_getIngestEndpoint(dsn)}?${_encodedAuth(dsn, sdkInfo)}`;
 }
 
 /** Returns the url to the report dialog endpoint. */
@@ -79,7 +95,9 @@ export function getReportDialogEndpoint(
         encodedOptions += `&email=${encodeURIComponent(user.email)}`;
       }
     } else {
-      encodedOptions += `&${encodeURIComponent(key)}=${encodeURIComponent(dialogOptions[key] as string)}`;
+      encodedOptions += `&${encodeURIComponent(key)}=${
+        encodeURIComponent(dialogOptions[key] as string)
+      }`;
     }
   }
 

@@ -1,6 +1,21 @@
 {
+  "compilerOptions": {
+    "strict": true
+  },
+  "fmt": {
+    "files": {
+      "exclude": [
+        "sentry-javascript/"
+      ]
+    },
+    "options": {
+      "singleQuote": true
+    }
+  },
   "tasks": {
     "generate-deps": "rm -rf sentry-javascript-deno && deno run --allow-all sentry-javascript-to-deno.ts",
-    "test": "deno bundle ./src/index.ts"
+    "test-bundle": "deno bundle ./mod.ts",
+    "test": "deno test --allow-read=./test,./src ./test",
+    "test-update": "deno test --allow-all ./test -- --update"
   }
 }

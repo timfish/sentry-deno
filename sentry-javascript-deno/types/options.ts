@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 import { Breadcrumb, BreadcrumbHint } from './breadcrumb.ts';
 import { Event, EventHint } from './event.ts';
 import { Integration } from './integration.ts';
@@ -8,7 +8,9 @@ import { StackLineParser, StackParser } from './stacktrace.ts';
 import { SamplingContext } from './transaction.ts';
 import { BaseTransportOptions, Transport } from './transport.ts';
 
-export interface ClientOptions<TO extends BaseTransportOptions = BaseTransportOptions> {
+export interface ClientOptions<
+  TO extends BaseTransportOptions = BaseTransportOptions,
+> {
   /**
    * Enable debug functionality in the SDK itself
    */
@@ -206,7 +208,10 @@ export interface ClientOptions<TO extends BaseTransportOptions = BaseTransportOp
    * @param hint May contain additional information about the original exception.
    * @returns A new event that will be sent | null.
    */
-  beforeSend?: (event: Event, hint: EventHint) => PromiseLike<Event | null> | Event | null;
+  beforeSend?: (
+    event: Event,
+    hint: EventHint,
+  ) => PromiseLike<Event | null> | Event | null;
 
   /**
    * A callback invoked when adding a breadcrumb, allowing to optionally modify
@@ -219,12 +224,19 @@ export interface ClientOptions<TO extends BaseTransportOptions = BaseTransportOp
    * @param breadcrumb The breadcrumb as created by the SDK.
    * @returns The breadcrumb that will be added | null.
    */
-  beforeBreadcrumb?: (breadcrumb: Breadcrumb, hint?: BreadcrumbHint) => Breadcrumb | null;
+  beforeBreadcrumb?: (
+    breadcrumb: Breadcrumb,
+    hint?: BreadcrumbHint,
+  ) => Breadcrumb | null;
 }
 
 /** Base configuration options for every SDK. */
 export interface Options<TO extends BaseTransportOptions = BaseTransportOptions>
-  extends Omit<Partial<ClientOptions<TO>>, 'integrations' | 'transport' | 'stackParser'> {
+  extends
+    Omit<
+      Partial<ClientOptions<TO>>,
+      'integrations' | 'transport' | 'stackParser'
+    > {
   /**
    * If this is set to false, default integrations will not be added, otherwise this will internally be set to the
    * recommended default integrations.
@@ -236,7 +248,9 @@ export interface Options<TO extends BaseTransportOptions = BaseTransportOptions>
    * Accepts either a list of integrations or a function that receives
    * default integrations and returns a new, updated list.
    */
-  integrations?: Integration[] | ((integrations: Integration[]) => Integration[]);
+  integrations?:
+    | Integration[]
+    | ((integrations: Integration[]) => Integration[]);
 
   /**
    * A function that takes transport options and returns the Transport object which is used to send events to Sentry.

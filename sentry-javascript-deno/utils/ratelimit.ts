@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 import { TransportMakeRequestResponse } from '../types/mod.ts';
 
 // Intentionally keeping the key broad, as we don't know for sure what rate limit headers get returned from backend
@@ -10,9 +10,11 @@ export const DEFAULT_RETRY_AFTER = 60 * 1000; // 60 seconds
  * Extracts Retry-After value from the request header or returns default value
  * @param header string representation of 'Retry-After' header
  * @param now current unix timestamp
- *
  */
-export function parseRetryAfterHeader(header: string, now: number = Date.now()): number {
+export function parseRetryAfterHeader(
+  header: string,
+  now: number = Date.now(),
+): number {
   const headerDelay = parseInt(`${header}`, 10);
   if (!isNaN(headerDelay)) {
     return headerDelay * 1000;
@@ -36,7 +38,11 @@ export function disabledUntil(limits: RateLimits, category: string): number {
 /**
  * Checks if a category is rate limited
  */
-export function isRateLimited(limits: RateLimits, category: string, now: number = Date.now()): boolean {
+export function isRateLimited(
+  limits: RateLimits,
+  category: string,
+  now: number = Date.now(),
+): boolean {
   return disabledUntil(limits, category) > now;
 }
 

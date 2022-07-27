@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 /**
  * Metadata about a captured exception, intended to provide a hint as to the means by which it was captured.
  */

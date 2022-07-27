@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 import { Attachment } from './attachment.ts';
 import { Breadcrumb } from './breadcrumb.ts';
 import { Context, Contexts } from './context.ts';
@@ -12,7 +12,10 @@ import { Transaction } from './transaction.ts';
 import { User } from './user.ts';
 
 /** JSDocs */
-export type CaptureContext = Scope | Partial<ScopeContext> | ((scope: Scope) => Scope);
+export type CaptureContext =
+  | Scope
+  | Partial<ScopeContext>
+  | ((scope: Scope) => Scope);
 
 /** JSDocs */
 export interface ScopeContext {

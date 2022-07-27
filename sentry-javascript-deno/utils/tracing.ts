@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 import { TraceparentData } from '../types/mod.ts';
 
 export const TRACEPARENT_REGEXP = new RegExp(
@@ -16,7 +16,9 @@ export const TRACEPARENT_REGEXP = new RegExp(
  *
  * @returns Object containing data from the header, or undefined if traceparent string is malformed
  */
-export function extractTraceparentData(traceparent: string): TraceparentData | undefined {
+export function extractTraceparentData(
+  traceparent: string,
+): TraceparentData | undefined {
   const matches = traceparent.match(TRACEPARENT_REGEXP);
   if (matches) {
     let parentSampled: boolean | undefined;

@@ -1,6 +1,10 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 import { createTransport } from '../../core/mod.ts';
-import { Transport, TransportMakeRequestResponse, TransportRequest } from '../../types/mod.ts';
+import {
+  Transport,
+  TransportMakeRequestResponse,
+  TransportRequest,
+} from '../../types/mod.ts';
 import { SyncPromise } from '../../utils/mod.ts';
 
 import { BrowserTransportOptions } from './types.ts';
@@ -19,7 +23,9 @@ const XHR_READYSTATE_DONE = 4;
  * Creates a Transport that uses the XMLHttpRequest API to send events to Sentry.
  */
 export function makeXHRTransport(options: BrowserTransportOptions): Transport {
-  function makeRequest(request: TransportRequest): PromiseLike<TransportMakeRequestResponse> {
+  function makeRequest(
+    request: TransportRequest,
+  ): PromiseLike<TransportMakeRequestResponse> {
     return new SyncPromise((resolve, reject) => {
       const xhr = {} as any;
 
@@ -30,7 +36,9 @@ export function makeXHRTransport(options: BrowserTransportOptions): Transport {
           resolve({
             statusCode: xhr.status,
             headers: {
-              'x-sentry-rate-limits': xhr.getResponseHeader('X-Sentry-Rate-Limits'),
+              'x-sentry-rate-limits': xhr.getResponseHeader(
+                'X-Sentry-Rate-Limits',
+              ),
               'retry-after': xhr.getResponseHeader('Retry-After'),
             },
           });
@@ -40,7 +48,9 @@ export function makeXHRTransport(options: BrowserTransportOptions): Transport {
       xhr.open('POST', options.url);
 
       for (const header in options.headers) {
-        if (Object.prototype.hasOwnProperty.call(options.headers, header) as any) {
+        if (
+          Object.prototype.hasOwnProperty.call(options.headers, header) as any
+        ) {
           xhr.setRequestHeader(header, options.headers[header]);
         }
       }

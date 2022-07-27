@@ -1,35 +1,39 @@
 import {
   BaseClient,
-  Scope as RealScope,
   SDK_VERSION as JS_SDK_VERSION,
-} from "../sentry-javascript-deno/core/mod.ts";
+} from '../sentry-javascript-deno/core/mod.ts';
 import {
   ClientOptions,
   Event,
   EventHint,
   Severity,
   SeverityLevel,
-} from "../sentry-javascript-deno/types/mod.ts";
-import { dsnFromString, logger } from "../sentry-javascript-deno/utils/mod.ts";
+} from '../sentry-javascript-deno/types/mod.ts';
 
-import { eventFromMessage, eventFromUnknownInput } from "./eventbuilder.ts";
-import { DenoTransportOptions } from "./transport.ts";
+import { eventFromMessage, eventFromUnknownInput } from './eventbuilder.ts';
+import { DenoTransportOptions } from './transport.ts';
 
-const SDK_VERSION = "0.1.0";
+const SDK_VERSION = '0.2.0';
 
-// deno-lint-ignore no-empty-interface
-export interface DenoClientOptions
-  extends ClientOptions<DenoTransportOptions> {}
+export interface DenoClientOptions extends ClientOptions<DenoTransportOptions> {
+  /**
+   * Path to the applications root directory
+   *
+   * If this is not supplied, we use Deno.cwd() if permissions permit and
+   * fallback to inferring the root directory from an Error stack trace.
+   */
+  appRoot?: string;
+}
 
 export class DenoClient extends BaseClient<DenoClientOptions> {
   constructor(options: DenoClientOptions) {
     options._metadata = options._metadata || {};
     options._metadata.sdk = options._metadata.sdk || {
-      name: "sentry.javascript.deno",
+      name: 'sentry.javascript.deno',
       version: SDK_VERSION,
       packages: [
         {
-          name: "npm:@sentry/core",
+          name: 'npm:@sentry/core',
           version: JS_SDK_VERSION,
         },
       ],
@@ -62,31 +66,6 @@ export class DenoClient extends BaseClient<DenoClientOptions> {
         this._options.attachStacktrace,
       ),
     );
-  }
-
-  protected async _prepareEvent(
-    event: Event,
-    hint: EventHint,
-    scope?: RealScope | undefined,
-  ): Promise<Event | null> {
-    if (this._options.dsn) {
-      // Check if we have permissions to send this event
-      const dsn = dsnFromString(this._options.dsn);
-      const permission = await Deno.permissions.query({
-        name: "net",
-        host: dsn.host,
-      });
-
-      if (permission.state !== "granted") {
-        logger.warn(
-          "Event was not sent due to missing permissions. Run Deno with --allow-net to allow sending of events.",
-        );
-
-        return null;
-      }
-    }
-
-    return await super._prepareEvent(event, hint, scope);
   }
 
   public flush(timeout?: number): PromiseLike<boolean> {

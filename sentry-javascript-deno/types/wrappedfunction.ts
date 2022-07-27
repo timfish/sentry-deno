@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 /** JSDoc */
 export interface WrappedFunction extends Function {
   [key: string]: any;

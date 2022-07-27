@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Event, Exception, Mechanism, StackFrame } from '../types/mod.ts';
 
@@ -43,11 +43,12 @@ export function uuid4(): string {
     };
 
     return (
-      pad(arr[0]) + pad(arr[1]) + pad(arr[2]) + pad(arr[3]) + pad(arr[4]) + pad(arr[5]) + pad(arr[6]) + pad(arr[7])
+      pad(arr[0]) + pad(arr[1]) + pad(arr[2]) + pad(arr[3]) + pad(arr[4]) +
+      pad(arr[5]) + pad(arr[6]) + pad(arr[7])
     );
   }
   // http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript/2117523#2117523
-  return 'xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx'.replace(/[xy]/g, c => {
+  return 'xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
     // eslint-disable-next-line no-bitwise
     const r = (Math.random() * 16) | 0;
     // eslint-disable-next-line no-bitwise
@@ -73,7 +74,9 @@ export function parseUrl(url: string): {
     return {};
   }
 
-  const match = url.match(/^(([^:/?#]+):)?(\/\/([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?$/);
+  const match = url.match(
+    /^(([^:/?#]+):)?(\/\/([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?$/,
+  );
 
   if (!match) {
     return {};
@@ -91,7 +94,9 @@ export function parseUrl(url: string): {
 }
 
 function getFirstException(event: Event): Exception | undefined {
-  return event.exception && event.exception.values ? event.exception.values[0] : undefined;
+  return event.exception && event.exception.values
+    ? event.exception.values[0]
+    : undefined;
 }
 
 /**
@@ -109,7 +114,8 @@ export function getEventDescription(event: Event): string {
     if (firstException.type && firstException.value) {
       return `${firstException.type}: ${firstException.value}`;
     }
-    return firstException.type || firstException.value || eventId || '<unknown>';
+    return firstException.type || firstException.value || eventId ||
+      '<unknown>';
   }
   return eventId || '<unknown>';
 }
@@ -121,7 +127,11 @@ export function getEventDescription(event: Event): string {
  * @param type Type of the exception.
  * @hidden
  */
-export function addExceptionTypeValue(event: Event, value?: string, type?: string): void {
+export function addExceptionTypeValue(
+  event: Event,
+  value?: string,
+  type?: string,
+): void {
   const exception = (event.exception = event.exception || {});
   const values = (exception.values = exception.values || []);
   const firstException = (values[0] = values[0] || {});
@@ -140,7 +150,10 @@ export function addExceptionTypeValue(event: Event, value?: string, type?: strin
  * @param newMechanism Mechanism data to add to the event.
  * @hidden
  */
-export function addExceptionMechanism(event: Event, newMechanism?: Partial<Mechanism>): void {
+export function addExceptionMechanism(
+  event: Event,
+  newMechanism?: Partial<Mechanism>,
+): void {
   const firstException = getFirstException(event);
   if (!firstException) {
     return;
@@ -148,10 +161,17 @@ export function addExceptionMechanism(event: Event, newMechanism?: Partial<Mecha
 
   const defaultMechanism = { type: 'generic', handled: true };
   const currentMechanism = firstException.mechanism;
-  firstException.mechanism = { ...defaultMechanism, ...currentMechanism, ...newMechanism };
+  firstException.mechanism = {
+    ...defaultMechanism,
+    ...currentMechanism,
+    ...newMechanism,
+  };
 
   if (newMechanism && 'data' in newMechanism) {
-    const mergedData = { ...(currentMechanism && currentMechanism.data), ...newMechanism.data };
+    const mergedData = {
+      ...(currentMechanism && currentMechanism.data),
+      ...newMechanism.data,
+    };
     firstException.mechanism.data = mergedData;
   }
 }
@@ -196,7 +216,11 @@ export function parseSemver(input: string): SemVer {
  * @param frame StackFrame that will be mutated
  * @param linesOfContext number of context lines we want to add pre/post
  */
-export function addContextToFrame(lines: string[], frame: StackFrame, linesOfContext: number = 5): void {
+export function addContextToFrame(
+  lines: string[],
+  frame: StackFrame,
+  linesOfContext: number = 5,
+): void {
   const lineno = frame.lineno || 0;
   const maxLines = lines.length;
   const sourceLine = Math.max(Math.min(maxLines, lineno - 1), 0);
@@ -205,7 +229,10 @@ export function addContextToFrame(lines: string[], frame: StackFrame, linesOfCon
     .slice(Math.max(0, sourceLine - linesOfContext), sourceLine)
     .map((line: string) => snipLine(line, 0));
 
-  frame.context_line = snipLine(lines[Math.min(maxLines - 1, sourceLine)], frame.colno || 0);
+  frame.context_line = snipLine(
+    lines[Math.min(maxLines - 1, sourceLine)],
+    frame.colno || 0,
+  );
 
   frame.post_context = lines
     .slice(Math.min(sourceLine + 1, maxLines), sourceLine + 1 + linesOfContext)
@@ -253,7 +280,11 @@ export function checkOrSetAlreadyCaught(exception: unknown): boolean {
   try {
     // set it this way rather than by assignment so that it's not ennumerable and therefore isn't recorded by the
     // `ExtraErrorData` integration
-    addNonEnumerableProperty(exception as { [key: string]: unknown }, '__sentry_captured__', true);
+    addNonEnumerableProperty(
+      exception as { [key: string]: unknown },
+      '__sentry_captured__',
+      true,
+    );
   } catch (err) {
     // `exception` is a primitive, so we can't mark it seen
   }

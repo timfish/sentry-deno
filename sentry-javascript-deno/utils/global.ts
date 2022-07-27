@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 /**
  * NOTE: In order to avoid circular dependencies, if you add a function to this module and it needs to print something,
  * you must either a) use `console.log` rather than the logger, or b) put your function elsewhere.
@@ -36,9 +36,7 @@ const fallbackGlobalObject = {};
  */
 export function getGlobalObject<T>(): any {
   return (
-    isNodeEnv()
-      ? undefined
-      : typeof window !== 'undefined' // eslint-disable-line no-restricted-globals
+    isNodeEnv() ? undefined : typeof window !== 'undefined' // eslint-disable-line no-restricted-globals
       ? window // eslint-disable-line no-restricted-globals
       : typeof self !== 'undefined'
       ? self
@@ -57,7 +55,11 @@ export function getGlobalObject<T>(): any {
  * @param obj (Optional) The global object on which to look for `__SENTRY__`, if not `getGlobalObject`'s return value
  * @returns the singleton
  */
-export function getGlobalSingleton<T>(name: keyof SentryGlobal['__SENTRY__'], creator: () => T, obj?: unknown): T {
+export function getGlobalSingleton<T>(
+  name: keyof SentryGlobal['__SENTRY__'],
+  creator: () => T,
+  obj?: unknown,
+): T {
   const global = (obj || getGlobalObject()) as SentryGlobal;
   const __SENTRY__ = (global.__SENTRY__ = global.__SENTRY__ || {});
   const singleton = __SENTRY__[name] || (__SENTRY__[name] = creator());

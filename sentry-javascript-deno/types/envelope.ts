@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 import { ClientReport } from './clientreport.ts';
 import { DsnComponents } from './dsn.ts';
 import { Event } from './event.ts';
@@ -41,9 +41,15 @@ export type BaseEnvelopeItemHeaders = {
   length?: number;
 };
 
-type BaseEnvelopeItem<IH extends BaseEnvelopeItemHeaders, P extends unknown> = [IH, P]; // P is for payload
+type BaseEnvelopeItem<IH extends BaseEnvelopeItemHeaders, P extends unknown> = [
+  IH,
+  P,
+]; // P is for payload
 
-type BaseEnvelope<EH extends BaseEnvelopeHeaders, I extends BaseEnvelopeItem<BaseEnvelopeItemHeaders, unknown>> = [
+type BaseEnvelope<
+  EH extends BaseEnvelopeHeaders,
+  I extends BaseEnvelopeItem<BaseEnvelopeItemHeaders, unknown>,
+> = [
   EH,
   I[],
 ];
@@ -65,20 +71,39 @@ type SessionAggregatesItemHeaders = { type: 'sessions' };
 type ClientReportItemHeaders = { type: 'client_report' };
 
 export type EventItem = BaseEnvelopeItem<EventItemHeaders, Event>;
-export type AttachmentItem = BaseEnvelopeItem<AttachmentItemHeaders, string | Uint8Array>;
-export type UserFeedbackItem = BaseEnvelopeItem<UserFeedbackItemHeaders, UserFeedback>;
+export type AttachmentItem = BaseEnvelopeItem<
+  AttachmentItemHeaders,
+  string | Uint8Array
+>;
+export type UserFeedbackItem = BaseEnvelopeItem<
+  UserFeedbackItemHeaders,
+  UserFeedback
+>;
 export type SessionItem =
   | BaseEnvelopeItem<SessionItemHeaders, Session>
   | BaseEnvelopeItem<SessionAggregatesItemHeaders, SessionAggregates>;
-export type ClientReportItem = BaseEnvelopeItem<ClientReportItemHeaders, ClientReport>;
+export type ClientReportItem = BaseEnvelopeItem<
+  ClientReportItemHeaders,
+  ClientReport
+>;
 
-export type EventEnvelopeHeaders = { event_id: string; sent_at: string; trace?: DynamicSamplingContext };
+export type EventEnvelopeHeaders = {
+  event_id: string;
+  sent_at: string;
+  trace?: DynamicSamplingContext;
+};
 type SessionEnvelopeHeaders = { sent_at: string };
 type ClientReportEnvelopeHeaders = BaseEnvelopeHeaders;
 
-export type EventEnvelope = BaseEnvelope<EventEnvelopeHeaders, EventItem | AttachmentItem | UserFeedbackItem>;
+export type EventEnvelope = BaseEnvelope<
+  EventEnvelopeHeaders,
+  EventItem | AttachmentItem | UserFeedbackItem
+>;
 export type SessionEnvelope = BaseEnvelope<SessionEnvelopeHeaders, SessionItem>;
-export type ClientReportEnvelope = BaseEnvelope<ClientReportEnvelopeHeaders, ClientReportItem>;
+export type ClientReportEnvelope = BaseEnvelope<
+  ClientReportEnvelopeHeaders,
+  ClientReportItem
+>;
 
 export type Envelope = EventEnvelope | SessionEnvelope | ClientReportEnvelope;
 export type EnvelopeItem = Envelope[1][number];

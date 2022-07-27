@@ -1,5 +1,10 @@
-// deno-lint-ignore-file 
-import { SerializedSession, Session, SessionContext, SessionStatus } from '../types/mod.ts';
+// deno-lint-ignore-file
+import {
+  SerializedSession,
+  Session,
+  SessionContext,
+  SessionStatus,
+} from '../types/mod.ts';
 import { dropUndefinedKeys, timestampInSeconds, uuid4 } from '../utils/mod.ts';
 
 /**
@@ -10,7 +15,9 @@ import { dropUndefinedKeys, timestampInSeconds, uuid4 } from '../utils/mod.ts';
  *
  * @returns a new `Session` object
  */
-export function makeSession(context?: Omit<SessionContext, 'started' | 'status'>): Session {
+export function makeSession(
+  context?: Omit<SessionContext, 'started' | 'status'>,
+): Session {
   // Both timestamp and started are in seconds since the UNIX epoch.
   const startingTime = timestampInSeconds();
 
@@ -45,14 +52,18 @@ export function makeSession(context?: Omit<SessionContext, 'started' | 'status'>
  * @param context the `SessionContext` holding the properties that should be updated in @param session
  */
 // eslint-disable-next-line complexity
-export function updateSession(session: Session, context: SessionContext = {}): void {
+export function updateSession(
+  session: Session,
+  context: SessionContext = {},
+): void {
   if (context.user) {
     if (!session.ipAddress && context.user.ip_address) {
       session.ipAddress = context.user.ip_address;
     }
 
     if (!session.did && !context.did) {
-      session.did = context.user.id || context.user.email || context.user.username;
+      session.did = context.user.id || context.user.email ||
+        context.user.username;
     }
   }
 
@@ -113,7 +124,10 @@ export function updateSession(session: Session, context: SessionContext = {}): v
  *               this function will keep the previously set status, unless it was `'ok'` in which case
  *               it is changed to `'exited'`.
  */
-export function closeSession(session: Session, status?: Exclude<SessionStatus, 'ok'>): void {
+export function closeSession(
+  session: Session,
+  status?: Exclude<SessionStatus, 'ok'>,
+): void {
   let context = {};
   if (status) {
     context = { status };
@@ -142,7 +156,9 @@ function sessionToJSON(session: Session): SerializedSession {
     timestamp: new Date(session.timestamp * 1000).toISOString(),
     status: session.status,
     errors: session.errors,
-    did: typeof session.did === 'number' || typeof session.did === 'string' ? `${session.did}` : undefined,
+    did: typeof session.did === 'number' || typeof session.did === 'string'
+      ? `${session.did}`
+      : undefined,
     duration: session.duration,
     attrs: {
       release: session.release,

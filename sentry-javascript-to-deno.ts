@@ -1,11 +1,11 @@
-import { ensureDir, walk } from "https://deno.land/std@0.148.0/fs/mod.ts";
+import { ensureDir, walk } from 'https://deno.land/std@0.148.0/fs/mod.ts';
 import {
   basename,
   dirname,
   join,
   relative,
-} from "https://deno.land/std@0.148.0/path/mod.ts";
-import * as typescript from "https://esm.sh/typescript@4.7.4";
+} from 'https://deno.land/std@0.148.0/path/mod.ts';
+import * as typescript from 'https://esm.sh/typescript@4.7.4';
 
 async function denoify({
   sourceDir,
@@ -29,7 +29,7 @@ async function denoify({
   const sourceFilePathMap = new Map<string, string>();
 
   for await (const entry of walk(sourceDir, { includeDirs: false })) {
-    const sourcePath = entry.path.replace(/\\/g, "/");
+    const sourcePath = entry.path.replace(/\\/g, '/');
 
     if (ignoreFiles.some((re) => re.test(sourcePath))) {
       continue;
@@ -51,7 +51,7 @@ async function denoify({
       file,
       typescript.ScriptTarget.Latest,
       false,
-      typescript.ScriptKind.TS
+      typescript.ScriptKind.TS,
     );
 
     const rewrittenFile: string[] = [];
@@ -78,7 +78,7 @@ async function denoify({
     });
     rewrittenFile.push(file.slice(cursor));
 
-    let code = "// deno-lint-ignore-file \n" + rewrittenFile.join("");
+    let code = '// deno-lint-ignore-file \n' + rewrittenFile.join('');
 
     for (const { match, replace } of codeReplace) {
       code = code.replace(match, replace);
@@ -91,10 +91,10 @@ async function denoify({
     return (
       join(destDir, sourcePath)
         // Move to the root of sentry-javascript-deno
-        .replace(/sentry-javascript\/packages\//, "")
-        .replace(/src\//, "")
+        .replace(/sentry-javascript\/packages\//, '')
+        .replace(/src\//, '')
         // Deno convention uses mod.ts rather than index
-        .replace(/index\.ts$/, "mod.ts")
+        .replace(/index\.ts$/, 'mod.ts')
     );
   }
 
@@ -105,7 +105,7 @@ async function denoify({
         const path = relative(
           // This is awful
           dirname(dirname(dirname(dirname(sourcePath)))),
-          rule.replace
+          rule.replace,
         );
         return importPath.replace(rule.match, path);
       }
@@ -115,15 +115,15 @@ async function denoify({
     let resolvedPath = join(dirname(sourcePath), importPath);
     if (!sourceFilePathMap.has(resolvedPath)) {
       // If importPath doesn't exist, first try appending '.ts'
-      resolvedPath = join(dirname(sourcePath), importPath + ".ts");
+      resolvedPath = join(dirname(sourcePath), importPath + '.ts');
 
       if (!sourceFilePathMap.has(resolvedPath)) {
         // If that path doesn't exist, next try appending '/index.ts'
-        resolvedPath = join(dirname(sourcePath), importPath + "/index.ts");
+        resolvedPath = join(dirname(sourcePath), importPath + '/index.ts');
 
         if (!sourceFilePathMap.has(resolvedPath)) {
           throw new Error(
-            `Cannot find imported file '${importPath}' in '${sourcePath}'`
+            `Cannot find imported file '${importPath}' in '${sourcePath}'`,
           );
         }
       }
@@ -131,121 +131,132 @@ async function denoify({
 
     const relImportPath = relative(
       dirname(sourceFilePathMap.get(sourcePath)!),
-      sourceFilePathMap.get(resolvedPath)!
+      sourceFilePathMap.get(resolvedPath)!,
     );
 
-    return relImportPath.startsWith("../")
+    return relImportPath.startsWith('../')
       ? relImportPath
-      : "./" + relImportPath;
+      : './' + relImportPath;
   }
 }
 
 function denoifyFor(pkg: string) {
   denoify({
     sourceDir: `./sentry-javascript/packages/${pkg}/src`,
-    destDir: "./sentry-javascript-deno",
-    ignoreFiles: [/buildPolyfills/, /\.js$/],
+    destDir: './sentry-javascript-deno',
+    ignoreFiles: [
+      /buildPolyfills/,
+      /\.js$/,
+      /tracing\/src\/index/,
+      /tracing\/src\/integrations/,
+      /tracing\/src\/browser\/(?!request)/,
+    ],
     importRewriteRules: [
       {
         match: /@sentry\/types/,
-        replace: "./types/mod.ts",
+        replace: './types/mod.ts',
       },
       {
         match: /@sentry\/utils/,
-        replace: "./utils/mod.ts",
+        replace: './utils/mod.ts',
       },
       {
         match: /@sentry\/hub/,
-        replace: "./hub/mod.ts",
+        replace: './hub/mod.ts',
       },
       {
         match: /@sentry\/core/,
-        replace: "./core/mod.ts",
+        replace: './core/mod.ts',
+      },
+      {
+        match: /@sentry\/browser/,
+        replace: './browser/mod.ts',
       },
     ],
     codeReplace: [
       // process and global cause deno to suggest importing node.js shims
       {
         match: /typeof process !== 'undefined' \? process : 0/,
-        replace: "undefined",
+        replace: 'undefined',
       },
-      { match: /\? global/, replace: "? undefined" },
+      { match: /\? global/, replace: '? undefined' },
       {
         match: /typeof global !== 'undefined' && value === global/,
-        replace: "false",
+        replace: 'false',
       },
       // Replace __DEBUG_BUILD__ and the resulting mangled declaration
-      { match: /__DEBUG_BUILD__/g, replace: "true" },
-      { match: /const true: boolean;/g, replace: "" },
+      { match: /__DEBUG_BUILD__/g, replace: 'true' },
+      { match: /const true: boolean;/g, replace: '' },
       // Remove the empty export which is not valid in Deno
-      { match: /export type {} from '\.\/globals\.ts';/g, replace: "" },
+      { match: /export type {} from '\.\/globals\.ts';/g, replace: '' },
       // Make the global object 'any' to ignore errors for missing globals in
       // multiple places
       {
         match: /function getGlobalObject<T>\(\): T & SentryGlobal {/g,
-        replace: "function getGlobalObject<T>(): any {",
+        replace: 'function getGlobalObject<T>(): any {',
       },
       // These don't exist in Deno
-      { match: / as Node/g, replace: "" },
-      { match: /new XMLHttpRequest\(\)/g, replace: "{} as any" },
-      { match: /Error.stackTraceLimit = 50;/g, replace: "" },
-      { match: / as DOMError/g, replace: "" },
-      { match: /\(module,/g, replace: "(undefined," },
-      { match: /WindowEventHandlers/g, replace: "any" },
-      { match: /History/g, replace: "any" },
-      { match: /HTMLElement/g, replace: "any" },
-      { match: /OnErrorEventHandler/g, replace: "any" },
-      { match: /this: Element/g, replace: "this: any" },
-      { match: / \| NodeJS.Global/g, replace: "" },
-      { match: /this: XMLHttpRequest/g, replace: "this: any" },
-      { match: /XMLHttpRequest.prototype/g, replace: "{}" },
-      { match: /extends XMLHttpRequest/g, replace: "extends Window" },
+      { match: / as Node/g, replace: '' },
+      { match: /new XMLHttpRequest\(\)/g, replace: '{} as any' },
+      { match: /Error.stackTraceLimit = 50;/g, replace: '' },
+      { match: / as DOMError/g, replace: '' },
+      { match: /\(module,/g, replace: '(undefined,' },
+      { match: /WindowEventHandlers/g, replace: 'any' },
+      { match: /History/g, replace: 'any' },
+      { match: /HTMLElement/g, replace: 'any' },
+      { match: /OnErrorEventHandler/g, replace: 'any' },
+      { match: /this: Element/g, replace: 'this: any' },
+      { match: / \| NodeJS.Global/g, replace: '' },
+      { match: /this: XMLHttpRequest/g, replace: 'this: any' },
+      { match: /XMLHttpRequest.prototype/g, replace: '{}' },
+      { match: /extends XMLHttpRequest/g, replace: 'extends Window' },
       {
         match: /InstrumentedElement = Element &/g,
-        replace: "InstrumentedElement = any &",
+        replace: 'InstrumentedElement = any &',
       },
       {
         match:
           /typeof Element !== 'undefined' && isInstanceOf\(wat, Element\)/g,
-        replace: "false",
+        replace: 'false',
       },
       {
         match: /typeof document !== 'undefined' && value === document/g,
-        replace: "false",
+        replace: 'false',
       },
       // apply and call types to not appear to match in Deno 🤔
       {
         match: /originalRemoveEventListener: \(\) => void/,
-        replace: "originalRemoveEventListener: (...args: any[]) => void",
+        replace: 'originalRemoveEventListener: (...args: any[]) => void',
       },
       {
         match:
           /return _oldOnUnhandledRejectionHandler.apply\(this, arguments\);/g,
         replace:
-          "return _oldOnUnhandledRejectionHandler.apply(this, arguments as any) as unknown as boolean;",
+          'return _oldOnUnhandledRejectionHandler.apply(this, arguments as any) as unknown as boolean;',
       },
       {
         match: /originalFunctionToString.apply\(context, args\);/g,
-        replace: "originalFunctionToString.apply(context, args) as any;",
+        replace: 'originalFunctionToString.apply(context, args) as any;',
       },
-      { match: /args: any\[\]/g, replace: "args: any" },
+      { match: /args: any\[\]/g, replace: 'args: any' },
       {
         match: /([a-zA-Z]*?)\.apply\((.*?)\)\.then\(/g,
-        replace: "($1.apply($2) as any).then(",
+        replace: '($1.apply($2) as any).then(',
       },
-      { match: /\.call\((.*?)\)/g, replace: ".call($1) as any" },
-      { match: /options,\s*]\)/g, replace: "options] as any) as any" },
+      { match: /\.call\((.*?)\)/g, replace: '.call($1) as any' },
+      { match: /options,\s*]\)/g, replace: 'options] as any) as any' },
       {
         match: /return original.apply\(this, args\);/g,
-        replace: "return original.apply(this, args) as any;",
+        replace: 'return original.apply(this, args) as any;',
       },
-      { match: /global\.crypto/g, replace: "(global as any).crypto" },
+      { match: /global\.crypto/g, replace: '(global as any).crypto' },
     ],
   });
 }
 
-denoifyFor("types");
-denoifyFor("utils");
-denoifyFor("hub");
-denoifyFor("core");
-denoifyFor("browser");
+denoifyFor('types');
+denoifyFor('utils');
+denoifyFor('hub');
+denoifyFor('core');
+denoifyFor('browser');
+denoifyFor('tracing');

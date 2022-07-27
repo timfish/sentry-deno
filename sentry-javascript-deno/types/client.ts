@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 import { EventDropReason } from './clientreport.ts';
 import { DataCategory } from './datacategory.ts';
 import { DsnComponents } from './dsn.ts';
@@ -17,7 +17,6 @@ import { Transport } from './transport.ts';
  * been installed. It allows to send events to Sentry, record breadcrumbs and
  * set a context included in every event. Since the SDK mutates its environment,
  * there will only be one instance during runtime.
- *
  */
 export interface Client<O extends ClientOptions = ClientOptions> {
   /**
@@ -28,7 +27,11 @@ export interface Client<O extends ClientOptions = ClientOptions> {
    * @param scope An optional scope containing event metadata.
    * @returns The event id
    */
-  captureException(exception: any, hint?: EventHint, scope?: Scope): string | undefined;
+  captureException(
+    exception: any,
+    hint?: EventHint,
+    scope?: Scope,
+  ): string | undefined;
 
   /**
    * Captures a message event and sends it to Sentry.
@@ -55,7 +58,11 @@ export interface Client<O extends ClientOptions = ClientOptions> {
    * @param scope An optional scope containing event metadata.
    * @returns The event id
    */
-  captureEvent(event: Event, hint?: EventHint, scope?: Scope): string | undefined;
+  captureEvent(
+    event: Event,
+    hint?: EventHint,
+    scope?: Scope,
+  ): string | undefined;
 
   /**
    * Captures a session
@@ -99,7 +106,9 @@ export interface Client<O extends ClientOptions = ClientOptions> {
   flush(timeout?: number): PromiseLike<boolean>;
 
   /** Returns an array of installed integrations on the client. */
-  getIntegration<T extends Integration>(integration: IntegrationClass<T>): T | null;
+  getIntegration<T extends Integration>(
+    integration: IntegrationClass<T>,
+  ): T | null;
 
   /** This is an internal function to setup all integrations that should run on the client */
   setupIntegrations(): void;

@@ -1,12 +1,13 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 export type {
   Breadcrumb,
   BreadcrumbHint,
-  Request,
-  SdkInfo,
   Event,
   EventHint,
   Exception,
+  Request,
+  SdkInfo,
+  Session,
   // eslint-disable-next-line deprecation/deprecation
   Severity,
   SeverityLevel,
@@ -14,26 +15,26 @@ export type {
   Stacktrace,
   Thread,
   User,
-  Session,
 } from '../types/mod.ts';
 
 export type { BrowserOptions } from './client.ts';
 export type { ReportDialogOptions } from './helpers.ts';
 
 export {
-  addGlobalEventProcessor,
   addBreadcrumb,
-  captureException,
+  addGlobalEventProcessor,
   captureEvent,
+  captureException,
   captureMessage,
   configureScope,
   createTransport,
-  getHubFromCarrier,
+  FunctionToString,
   getCurrentHub,
+  getHubFromCarrier,
   Hub,
+  InboundFilters,
   makeMain,
   Scope,
-  startTransaction,
   SDK_VERSION,
   setContext,
   setExtra,
@@ -41,21 +42,37 @@ export {
   setTag,
   setTags,
   setUser,
+  startTransaction,
   withScope,
-  FunctionToString,
-  InboundFilters,
 } from '../core/mod.ts';
 
 export { BrowserClient } from './client.ts';
 export { makeFetchTransport, makeXHRTransport } from './transports/mod.ts';
 export {
-  defaultStackParser,
-  defaultStackLineParsers,
   chromeStackLineParser,
+  defaultStackLineParsers,
+  defaultStackParser,
   geckoStackLineParser,
   opera10StackLineParser,
   opera11StackLineParser,
   winjsStackLineParser,
 } from './stack-parsers.ts';
-export { defaultIntegrations, forceLoad, init, lastEventId, onLoad, showReportDialog, flush, close, wrap } from './sdk.ts';
-export { GlobalHandlers, TryCatch, Breadcrumbs, LinkedErrors, HttpContext, Dedupe } from './integrations/mod.ts';
+export {
+  close,
+  defaultIntegrations,
+  flush,
+  forceLoad,
+  init,
+  lastEventId,
+  onLoad,
+  showReportDialog,
+  wrap,
+} from './sdk.ts';
+export {
+  Breadcrumbs,
+  Dedupe,
+  GlobalHandlers,
+  HttpContext,
+  LinkedErrors,
+  TryCatch,
+} from './integrations/mod.ts';

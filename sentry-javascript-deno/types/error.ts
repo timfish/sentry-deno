@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 /**
  * Just an Error object with arbitrary attributes attached to it.
  */

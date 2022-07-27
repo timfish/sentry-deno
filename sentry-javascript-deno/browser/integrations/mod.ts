@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 export { GlobalHandlers } from './globalhandlers.ts';
 export { TryCatch } from './trycatch.ts';
 export { Breadcrumbs } from './breadcrumbs.ts';

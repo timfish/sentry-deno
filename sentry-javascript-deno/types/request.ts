@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 /** Request data included in an event as sent to Sentry */
 export interface Request {
   url?: string;
@@ -10,4 +10,7 @@ export interface Request {
   headers?: { [key: string]: string };
 }
 
-export type QueryParams = string | { [key: string]: string } | Array<[string, string]>;
+export type QueryParams =
+  | string
+  | { [key: string]: string }
+  | Array<[string, string]>;

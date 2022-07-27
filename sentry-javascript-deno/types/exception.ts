@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 import { Mechanism } from './mechanism.ts';
 import { Stacktrace } from './stacktrace.ts';
 

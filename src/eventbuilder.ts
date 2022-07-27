@@ -1,4 +1,4 @@
-import { getCurrentHub } from "../sentry-javascript-deno/core/mod.ts";
+import { getCurrentHub } from '../sentry-javascript-deno/core/mod.ts';
 import {
   Event,
   EventHint,
@@ -9,7 +9,7 @@ import {
   SeverityLevel,
   StackFrame,
   StackParser,
-} from "../sentry-javascript-deno/types/mod.ts";
+} from '../sentry-javascript-deno/types/mod.ts';
 import {
   addExceptionMechanism,
   addExceptionTypeValue,
@@ -17,7 +17,7 @@ import {
   isError,
   isPlainObject,
   normalizeToSize,
-} from "../sentry-javascript-deno/utils/mod.ts";
+} from '../sentry-javascript-deno/utils/mod.ts';
 
 /**
  * Extracts stack frames from the error.stack string
@@ -26,7 +26,7 @@ export function parseStackFrames(
   stackParser: StackParser,
   error: Error,
 ): StackFrame[] {
-  return stackParser(error.stack || "", 1);
+  return stackParser(error.stack || '', 1);
 }
 
 /**
@@ -64,7 +64,7 @@ export function eventFromUnknownInput(
     (hint.data as { mechanism: Mechanism }).mechanism;
   const mechanism: Mechanism = providedMechanism || {
     handled: true,
-    type: "generic",
+    type: 'generic',
   };
 
   if (!isError(exception)) {
@@ -78,7 +78,7 @@ export function eventFromUnknownInput(
       }`;
 
       getCurrentHub().configureScope((scope: Scope) => {
-        scope.setExtra("__serialized__", normalizeToSize(exception));
+        scope.setExtra('__serialized__', normalizeToSize(exception));
       });
 
       ex = (hint && hint.syntheticException) || new Error(message);
@@ -115,7 +115,7 @@ export function eventFromMessage(
   stackParser: StackParser,
   message: string,
   // eslint-disable-next-line deprecation/deprecation
-  level: Severity | SeverityLevel = "info",
+  level: Severity | SeverityLevel = 'info',
   hint?: EventHint,
   attachStacktrace?: boolean,
 ): Event {

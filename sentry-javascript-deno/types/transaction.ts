@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 import { Baggage } from './baggage.ts';
 import { MeasurementUnit } from './measurement.ts';
 import { ExtractedNodeRequestData, Primitive, WorkerLocation } from './misc.ts';
@@ -34,7 +34,10 @@ export interface TransactionContext extends SpanContext {
 /**
  * Data pulled from a `sentry-trace` header
  */
-export type TraceparentData = Pick<TransactionContext, 'traceId' | 'parentSpanId' | 'parentSampled'>;
+export type TraceparentData = Pick<
+  TransactionContext,
+  'traceId' | 'parentSpanId' | 'parentSampled'
+>;
 
 /**
  * Transaction "Class", inherits Span only has `setName`
@@ -135,7 +138,11 @@ export interface SamplingContext extends CustomSamplingContext {
   request?: ExtractedNodeRequestData;
 }
 
-export type TransactionSamplingMethod = 'explicitly_set' | 'client_sampler' | 'client_rate' | 'inheritance';
+export type TransactionSamplingMethod =
+  | 'explicitly_set'
+  | 'client_sampler'
+  | 'client_rate'
+  | 'inheritance';
 
 export interface TransactionMetadata {
   transactionSampling?: { rate?: number; method: TransactionSamplingMethod };

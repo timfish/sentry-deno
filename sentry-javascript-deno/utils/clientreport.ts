@@ -1,5 +1,9 @@
-// deno-lint-ignore-file 
-import { ClientReport, ClientReportEnvelope, ClientReportItem } from '../types/mod.ts';
+// deno-lint-ignore-file
+import {
+  ClientReport,
+  ClientReportEnvelope,
+  ClientReportItem,
+} from '../types/mod.ts';
 
 import { createEnvelope } from './envelope.ts';
 import { dateTimestampInSeconds } from './time.ts';
@@ -21,5 +25,7 @@ export function createClientReportEnvelope(
       discarded_events,
     },
   ];
-  return createEnvelope<ClientReportEnvelope>(dsn ? { dsn } : {}, [clientReportItem]);
+  return createEnvelope<ClientReportEnvelope>(dsn ? { dsn } : {}, [
+    clientReportItem,
+  ]);
 }

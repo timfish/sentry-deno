@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 import {
   getCurrentHub,
   getIntegrationsToSetup,
@@ -16,9 +16,20 @@ import {
   supportsFetch,
 } from '../utils/mod.ts';
 
-import { BrowserClient, BrowserClientOptions, BrowserOptions } from './client.ts';
+import {
+  BrowserClient,
+  BrowserClientOptions,
+  BrowserOptions,
+} from './client.ts';
 import { ReportDialogOptions, wrap as internalWrap } from './helpers.ts';
-import { Breadcrumbs, Dedupe, GlobalHandlers, HttpContext, LinkedErrors, TryCatch } from './integrations/mod.ts';
+import {
+  Breadcrumbs,
+  Dedupe,
+  GlobalHandlers,
+  HttpContext,
+  LinkedErrors,
+  TryCatch,
+} from './integrations/mod.ts';
 import { defaultStackParser } from './stack-parsers.ts';
 import { makeFetchTransport, makeXHRTransport } from './transports/mod.ts';
 
@@ -110,9 +121,12 @@ export function init(options: BrowserOptions = {}): void {
 
   const clientOptions: BrowserClientOptions = {
     ...options,
-    stackParser: stackParserFromStackParserOptions(options.stackParser || defaultStackParser),
+    stackParser: stackParserFromStackParserOptions(
+      options.stackParser || defaultStackParser,
+    ),
     integrations: getIntegrationsToSetup(options),
-    transport: options.transport || (supportsFetch() ? makeFetchTransport : makeXHRTransport),
+    transport: options.transport ||
+      (supportsFetch() ? makeFetchTransport : makeXHRTransport),
   };
 
   initAndBind(BrowserClient, clientOptions);
@@ -127,11 +141,15 @@ export function init(options: BrowserOptions = {}): void {
  *
  * @param options Everything is optional, we try to fetch all info need from the global scope.
  */
-export function showReportDialog(options: ReportDialogOptions = {}, hub: Hub = getCurrentHub()): void {
+export function showReportDialog(
+  options: ReportDialogOptions = {},
+  hub: Hub = getCurrentHub(),
+): void {
   // doesn't work without a document (React Native)
   const global = getGlobalObject<Window>();
   if (!global.document) {
-    true && logger.error('Global document not defined in showReportDialog call');
+    true &&
+      logger.error('Global document not defined in showReportDialog call');
     return;
   }
 
@@ -166,7 +184,10 @@ export function showReportDialog(options: ReportDialogOptions = {}, hub: Hub = g
   if (injectionPoint) {
     injectionPoint.appendChild(script);
   } else {
-    true && logger.error('Not injecting report dialog. No injection point found in HTML');
+    true &&
+      logger.error(
+        'Not injecting report dialog. No injection point found in HTML',
+      );
   }
 }
 
@@ -225,7 +246,8 @@ export function close(timeout?: number): PromiseLike<boolean> {
   if (client) {
     return client.close(timeout);
   }
-  true && logger.warn('Cannot flush events and disable SDK. No client defined.');
+  true &&
+    logger.warn('Cannot flush events and disable SDK. No client defined.');
   return resolvedSyncPromise(false);
 }
 
@@ -255,7 +277,9 @@ function startSessionTracking(): void {
 
   if (typeof document === 'undefined') {
     true &&
-      logger.warn('Session tracking in non-browser environment with @sentry/browser is not supported.');
+      logger.warn(
+        'Session tracking in non-browser environment with @sentry/browser is not supported.',
+      );
     return;
   }
 

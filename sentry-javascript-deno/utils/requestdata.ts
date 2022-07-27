@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 /* eslint-disable complexity */
 /**
  * The functions here, which enrich an event with request data, are mostly for use in Node, but are safe for use in a
@@ -25,7 +25,14 @@ const DEFAULT_INCLUDES = {
   transaction: true,
   user: true,
 };
-const DEFAULT_REQUEST_INCLUDES = ['cookies', 'data', 'headers', 'method', 'query_string', 'url'];
+const DEFAULT_REQUEST_INCLUDES = [
+  'cookies',
+  'data',
+  'headers',
+  'method',
+  'query_string',
+  'url',
+];
 const DEFAULT_USER_INCLUDES = ['id', 'username', 'email'];
 
 type BaseRequest = {
@@ -86,12 +93,13 @@ type ExpressRequest = NodeRequest & {
 };
 
 /** A `Request` type compatible with Node, Express, browser, etc., because everything is optional */
-export type CrossPlatformRequest = BaseRequest &
-  BrowserRequest &
-  NodeRequest &
-  ExpressRequest &
-  KoaRequest &
-  NextjsRequest;
+export type CrossPlatformRequest =
+  & BaseRequest
+  & BrowserRequest
+  & NodeRequest
+  & ExpressRequest
+  & KoaRequest
+  & NextjsRequest;
 
 type InjectedNodeDeps = {
   cookie: {
@@ -114,7 +122,10 @@ export function addRequestDataToTransaction(
   deps?: InjectedNodeDeps,
 ): void {
   if (!transaction) return;
-  transaction.name = extractPathForTransaction(req, { path: true, method: true });
+  transaction.name = extractPathForTransaction(req, {
+    path: true,
+    method: true,
+  });
   transaction.setData('url', req.originalUrl || req.url);
   if (req.baseUrl) {
     transaction.setData('baseUrl', req.baseUrl);
@@ -142,8 +153,7 @@ export function extractPathForTransaction(
   // Check to see if there's a parameterized route we can use (as there is in Express)
   if (req.route) {
     path = `${req.baseUrl || ''}${req.route.path}`;
-  }
-  // Otherwise, just take the original URL
+  } // Otherwise, just take the original URL
   else if (req.originalUrl || req.url) {
     path = stripUrlQueryAndFragment(req.originalUrl || req.url || '');
   }
@@ -165,13 +175,17 @@ export function extractPathForTransaction(
 type TransactionNamingScheme = 'path' | 'methodPath' | 'handler';
 
 /** JSDoc */
-function extractTransaction(req: CrossPlatformRequest, type: boolean | TransactionNamingScheme): string {
+function extractTransaction(
+  req: CrossPlatformRequest,
+  type: boolean | TransactionNamingScheme,
+): string {
   switch (type) {
     case 'path': {
       return extractPathForTransaction(req, { path: true });
     }
     case 'handler': {
-      return (req.route && req.route.stack && req.route.stack[0] && req.route.stack[0].name) || '<anonymous>';
+      return (req.route && req.route.stack && req.route.stack[0] &&
+        req.route.stack[0].name) || '<anonymous>';
     }
     case 'methodPath':
     default: {
@@ -190,7 +204,7 @@ function extractUserData(
   const extractedUser: { [key: string]: any } = {};
   const attributes = Array.isArray(keys) ? keys : DEFAULT_USER_INCLUDES;
 
-  attributes.forEach(key => {
+  attributes.forEach((key) => {
     if (user && key in user) {
       extractedUser[key] = user[key];
     }
@@ -235,14 +249,17 @@ export function extractRequestData(
   // protocol:
   //   node, nextjs: <n/a>
   //   express, koa: req.protocol
-  const protocol = req.protocol === 'https' || (req.socket && req.socket.encrypted) ? 'https' : 'http';
+  const protocol =
+    req.protocol === 'https' || (req.socket && req.socket.encrypted)
+      ? 'https'
+      : 'http';
   // url (including path and query string):
   //   node, express: req.originalUrl
   //   koa, nextjs: req.url
   const originalUrl = req.originalUrl || req.url || '';
   // absolute url
   const absoluteUrl = `${protocol}://${host}${originalUrl}`;
-  include.forEach(key => {
+  include.forEach((key) => {
     switch (key) {
       case 'headers': {
         requestData.headers = headers;
@@ -264,7 +281,10 @@ export function extractRequestData(
         requestData.cookies =
           // TODO (v8 / #5257): We're only sending the empty object for backwards compatibility, so the last bit can
           // come off in v8
-          req.cookies || (headers.cookie && deps && deps.cookie && deps.cookie.parse(headers.cookie)) || {};
+          req.cookies ||
+          (headers.cookie && deps && deps.cookie &&
+            deps.cookie.parse(headers.cookie)) ||
+          {};
         break;
       }
       case 'query_string': {
@@ -286,7 +306,9 @@ export function extractRequestData(
         //   https://nodejs.dev/learn/get-http-request-body-data-using-nodejs); if a user is doing that, we can't know
         //   where they're going to store the final result, so they'll have to capture this data themselves
         if (req.body !== undefined) {
-          requestData.data = isString(req.body) ? req.body : JSON.stringify(normalize(req.body));
+          requestData.data = isString(req.body)
+            ? req.body
+            : JSON.stringify(normalize(req.body));
         }
         break;
       }
@@ -347,7 +369,10 @@ export function addRequestDataToEvent(
 
   if (include.request) {
     const extractedRequestData = Array.isArray(include.request)
-      ? extractRequestData(req, { include: include.request, deps: options?.deps })
+      ? extractRequestData(req, {
+        include: include.request,
+        deps: options?.deps,
+      })
       : extractRequestData(req, { deps: options?.deps });
 
     event.request = {
@@ -357,7 +382,9 @@ export function addRequestDataToEvent(
   }
 
   if (include.user) {
-    const extractedUser = req.user && isPlainObject(req.user) ? extractUserData(req.user, include.user) : {};
+    const extractedUser = req.user && isPlainObject(req.user)
+      ? extractUserData(req.user, include.user)
+      : {};
 
     if (Object.keys(extractedUser).length) {
       event.user = {
@@ -410,7 +437,8 @@ function extractQueryParams(
 
   return (
     req.query ||
-    (typeof URL !== undefined && new URL(originalUrl).search.replace('?', '')) ||
+    (typeof URL !== undefined &&
+      new URL(originalUrl).search.replace('?', '')) ||
     // In Node 8, `URL` isn't in the global scope, so we have to use the built-in module from Node
     (deps && deps.url && deps.url.parse(originalUrl).query) ||
     undefined

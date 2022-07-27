@@ -1,10 +1,11 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 import { DsnComponents, DsnLike, DsnProtocol } from '../types/mod.ts';
 
 import { SentryError } from './error.ts';
 
 /** Regular expression used to parse a Dsn. */
-const DSN_REGEX = /^(?:(\w+):)\/\/(?:(\w+)(?::(\w+))?@)([\w.-]+)(?::(\d+))?\/(.+)/;
+const DSN_REGEX =
+  /^(?:(\w+):)\/\/(?:(\w+)(?::(\w+))?@)([\w.-]+)(?::(\d+))?\/(.+)/;
 
 function isValidProtocol(protocol?: string): protocol is DsnProtocol {
   return protocol === 'http' || protocol === 'https';
@@ -19,7 +20,10 @@ function isValidProtocol(protocol?: string): protocol is DsnProtocol {
  *
  * @param withPassword When set to true, the password will be included.
  */
-export function dsnToString(dsn: DsnComponents, withPassword: boolean = false): string {
+export function dsnToString(
+  dsn: DsnComponents,
+  withPassword: boolean = false,
+): string {
   const { host, path, pass, port, projectId, protocol, publicKey } = dsn;
   return (
     `${protocol}://${publicKey}${withPassword && pass ? `:${pass}` : ''}` +
@@ -40,7 +44,8 @@ export function dsnFromString(str: string): DsnComponents {
     throw new SentryError(`Invalid Sentry Dsn: ${str}`);
   }
 
-  const [protocol, publicKey, pass = '', host, port = '', lastPath] = match.slice(1);
+  const [protocol, publicKey, pass = '', host, port = '', lastPath] = match
+    .slice(1);
   let path = '';
   let projectId = lastPath;
 
@@ -57,7 +62,15 @@ export function dsnFromString(str: string): DsnComponents {
     }
   }
 
-  return dsnFromComponents({ host, pass, path, projectId, port, protocol: protocol as DsnProtocol, publicKey });
+  return dsnFromComponents({
+    host,
+    pass,
+    path,
+    projectId,
+    port,
+    protocol: protocol as DsnProtocol,
+    publicKey,
+  });
 }
 
 function dsnFromComponents(components: DsnComponents): DsnComponents {
@@ -79,8 +92,13 @@ function validateDsn(dsn: DsnComponents): boolean | void {
 
   const { port, projectId, protocol } = dsn;
 
-  const requiredComponents: ReadonlyArray<keyof DsnComponents> = ['protocol', 'publicKey', 'host', 'projectId'];
-  requiredComponents.forEach(component => {
+  const requiredComponents: ReadonlyArray<keyof DsnComponents> = [
+    'protocol',
+    'publicKey',
+    'host',
+    'projectId',
+  ];
+  requiredComponents.forEach((component) => {
     if (!dsn[component]) {
       throw new SentryError(`Invalid Sentry Dsn: ${component} missing`);
     }
@@ -103,7 +121,9 @@ function validateDsn(dsn: DsnComponents): boolean | void {
 
 /** The Sentry Dsn, identifying a Sentry instance and project. */
 export function makeDsn(from: DsnLike): DsnComponents {
-  const components = typeof from === 'string' ? dsnFromString(from) : dsnFromComponents(from);
+  const components = typeof from === 'string'
+    ? dsnFromString(from)
+    : dsnFromComponents(from);
   validateDsn(components);
   return components;
 }

@@ -1,6 +1,11 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 import { Integration, WrappedFunction } from '../../types/mod.ts';
-import { fill, getFunctionName, getGlobalObject, getOriginalFunction } from '../../utils/mod.ts';
+import {
+  fill,
+  getFunctionName,
+  getGlobalObject,
+  getOriginalFunction,
+} from '../../utils/mod.ts';
 
 import { wrap } from '../helpers.ts';
 
@@ -36,7 +41,11 @@ const DEFAULT_EVENT_TARGET = [
   'XMLHttpRequestUpload',
 ];
 
-type XMLHttpRequestProp = 'onload' | 'onerror' | 'onprogress' | 'onreadystatechange';
+type XMLHttpRequestProp =
+  | 'onload'
+  | 'onerror'
+  | 'onprogress'
+  | 'onreadystatechange';
 
 /** JSDoc */
 interface TryCatchOptions {
@@ -101,7 +110,9 @@ export class TryCatch implements Integration {
 
     const eventTargetOption = this._options.eventTarget;
     if (eventTargetOption) {
-      const eventTarget = Array.isArray(eventTargetOption) ? eventTargetOption : DEFAULT_EVENT_TARGET;
+      const eventTarget = Array.isArray(eventTargetOption)
+        ? eventTargetOption
+        : DEFAULT_EVENT_TARGET;
       eventTarget.forEach(_wrapEventTarget);
     }
   }
@@ -150,9 +161,14 @@ function _wrapXHR(originalSend: () => void): () => void {
   return function (this: any, ...args: any): void {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const xhr = this;
-    const xmlHttpRequestProps: XMLHttpRequestProp[] = ['onload', 'onerror', 'onprogress', 'onreadystatechange'];
+    const xmlHttpRequestProps: XMLHttpRequestProp[] = [
+      'onload',
+      'onerror',
+      'onprogress',
+      'onreadystatechange',
+    ];
 
-    xmlHttpRequestProps.forEach(prop => {
+    xmlHttpRequestProps.forEach((prop) => {
       if (prop in xhr && typeof xhr[prop] === 'function') {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         fill(xhr, prop, function (original: WrappedFunction): () => any {
@@ -170,7 +186,9 @@ function _wrapXHR(originalSend: () => void): () => void {
           // If Instrument integration has been called before TryCatch, get the name of original function
           const originalFunction = getOriginalFunction(original);
           if (originalFunction) {
-            wrapOptions.mechanism.data.handler = getFunctionName(originalFunction);
+            wrapOptions.mechanism.data.handler = getFunctionName(
+              originalFunction,
+            );
           }
 
           // Otherwise wrap directly
@@ -191,7 +209,9 @@ function _wrapEventTarget(target: string): void {
   const proto = global[target] && global[target].prototype;
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, no-prototype-builtins
-  if (!proto || !proto.hasOwnProperty || !proto.hasOwnProperty('addEventListener')) {
+  if (
+    !proto || !proto.hasOwnProperty || !proto.hasOwnProperty('addEventListener')
+  ) {
     return;
   }
 
@@ -206,7 +226,12 @@ function _wrapEventTarget(target: string): void {
       eventName: string,
       fn: EventListenerObject,
       options?: boolean | AddEventListenerOptions,
-    ): (eventName: string, fn: EventListenerObject, capture?: boolean, secure?: boolean) => void {
+    ): (
+      eventName: string,
+      fn: EventListenerObject,
+      capture?: boolean,
+      secure?: boolean,
+    ) => void {
       try {
         if (typeof fn.handleEvent === 'function') {
           // ESlint disable explanation:
@@ -245,7 +270,8 @@ function _wrapEventTarget(target: string): void {
             type: 'instrument',
           },
         }),
-        options] as any) as any;
+        options,
+      ] as any) as any;
     };
   });
 
@@ -255,7 +281,12 @@ function _wrapEventTarget(target: string): void {
     function (
       originalRemoveEventListener: (...args: any) => void,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ): (this: any, eventName: string, fn: EventListenerObject, options?: boolean | EventListenerOptions) => () => void {
+    ): (
+      this: any,
+      eventName: string,
+      fn: EventListenerObject,
+      options?: boolean | EventListenerOptions,
+    ) => () => void {
       return function (
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         this: any,
@@ -282,14 +313,25 @@ function _wrapEventTarget(target: string): void {
          */
         const wrappedEventHandler = fn as unknown as WrappedFunction;
         try {
-          const originalEventHandler = wrappedEventHandler && wrappedEventHandler.__sentry_wrapped__;
+          const originalEventHandler = wrappedEventHandler &&
+            wrappedEventHandler.__sentry_wrapped__;
           if (originalEventHandler) {
-            originalRemoveEventListener.call(this, eventName, originalEventHandler, options) as any;
+            originalRemoveEventListener.call(
+              this,
+              eventName,
+              originalEventHandler,
+              options,
+            ) as any;
           }
         } catch (e) {
           // ignore, accessing __sentry_wrapped__ will throw in some Selenium environments
         }
-        return originalRemoveEventListener.call(this, eventName, wrappedEventHandler, options) as any;
+        return originalRemoveEventListener.call(
+          this,
+          eventName,
+          wrappedEventHandler,
+          options,
+        ) as any;
       };
     },
   );

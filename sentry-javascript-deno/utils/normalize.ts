@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 import { Primitive } from '../types/mod.ts';
 
 import { isNaN, isSyntheticEvent } from './is.ts';
@@ -33,7 +33,11 @@ type ObjOrArray<T> = { [key: string]: T };
  * @returns A normalized version of the object, or `"**non-serializable**"` if any errors are thrown during normalization.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function normalize(input: unknown, depth: number = +Infinity, maxProperties: number = +Infinity): any {
+export function normalize(
+  input: unknown,
+  depth: number = +Infinity,
+  maxProperties: number = +Infinity,
+): any {
   try {
     // since we're at the outermost level, we don't provide a key
     return visit('', input, depth, maxProperties);
@@ -79,7 +83,10 @@ function visit(
   const [memoize, unmemoize] = memo;
 
   // Get the simple cases out of the way first
-  if (value === null || (['number', 'boolean', 'string'].includes(typeof value) && !isNaN(value))) {
+  if (
+    value === null ||
+    (['number', 'boolean', 'string'].includes(typeof value) && !isNaN(value))
+  ) {
     return value as Primitive;
   }
 
@@ -146,7 +153,13 @@ function visit(
 
     // Recursively visit all the child nodes
     const visitValue = visitable[visitKey];
-    normalized[visitKey] = visit(visitKey, visitValue, depth - 1, maxProperties, memo);
+    normalized[visitKey] = visit(
+      visitKey,
+      visitValue,
+      depth - 1,
+      maxProperties,
+      memo,
+    );
 
     numAdded += 1;
   }
@@ -177,7 +190,10 @@ function stringifyValue(
   value: Exclude<unknown, string | number | boolean | null>,
 ): string {
   try {
-    if (key === 'domain' && value && typeof value === 'object' && (value as { _events: unknown })._events) {
+    if (
+      key === 'domain' && value && typeof value === 'object' &&
+      (value as { _events: unknown })._events
+    ) {
       return '[Domain]';
     }
 
@@ -233,7 +249,9 @@ function stringifyValue(
     // them to strings means that instances of classes which haven't defined their `toStringTag` will just come out as
     // `"[object Object]"`. If we instead look at the constructor's name (which is the same as the name of the class),
     // we can make sure that only plain objects come out that way.
-    return `[object ${(Object.getPrototypeOf(value) as Prototype).constructor.name}]`;
+    return `[object ${
+      (Object.getPrototypeOf(value) as Prototype).constructor.name
+    }]`;
   } catch (err) {
     return `**non-serializable** (${err})`;
   }

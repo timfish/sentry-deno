@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 import { EventDropReason } from './clientreport.ts';
 import { DataCategory } from './datacategory.ts';
 import { Envelope } from './envelope.ts';
@@ -19,7 +19,10 @@ export type TransportMakeRequestResponse = {
 
 export interface InternalBaseTransportOptions {
   bufferSize?: number;
-  recordDroppedEvent: (reason: EventDropReason, dataCategory: DataCategory) => void;
+  recordDroppedEvent: (
+    reason: EventDropReason,
+    dataCategory: DataCategory,
+  ) => void;
   textEncoder?: TextEncoderInternal;
 }
 
@@ -35,4 +38,6 @@ export interface Transport {
   flush(timeout?: number): PromiseLike<boolean>;
 }
 
-export type TransportRequestExecutor = (request: TransportRequest) => PromiseLike<TransportMakeRequestResponse>;
+export type TransportRequestExecutor = (
+  request: TransportRequest,
+) => PromiseLike<TransportMakeRequestResponse>;

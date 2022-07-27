@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 import { Package } from './package.ts';
 
 export interface SdkInfo {

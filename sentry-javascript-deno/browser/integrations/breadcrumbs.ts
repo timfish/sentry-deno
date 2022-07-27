@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable max-lines */
 import { getCurrentHub } from '../../core/mod.ts';
@@ -92,7 +92,9 @@ export class Breadcrumbs implements Integration {
  * This is a HOC so that we get access to dom options in the closure.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function _domBreadcrumb(dom: BreadcrumbsOptions['dom']): (handlerData: { [key: string]: any }) => void {
+function _domBreadcrumb(
+  dom: BreadcrumbsOptions['dom'],
+): (handlerData: { [key: string]: any }) => void {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function _innerDomBreadcrumb(handlerData: { [key: string]: any }): void {
     let target;
@@ -148,7 +150,9 @@ function _consoleBreadcrumb(handlerData: { [key: string]: any }): void {
 
   if (handlerData.level === 'assert') {
     if (handlerData.args[0] === false) {
-      breadcrumb.message = `Assertion failed: ${safeJoin(handlerData.args.slice(1), ' ') || 'console.assert'}`;
+      breadcrumb.message = `Assertion failed: ${
+        safeJoin(handlerData.args.slice(1), ' ') || 'console.assert'
+      }`;
       breadcrumb.data.arguments = handlerData.args.slice(1);
     } else {
       // Don't capture a breadcrumb for passed assertions
@@ -173,7 +177,8 @@ function _xhrBreadcrumb(handlerData: { [key: string]: any }): void {
       return;
     }
 
-    const { method, url, status_code, body } = handlerData.xhr.__sentry_xhr__ || {};
+    const { method, url, status_code, body } = handlerData.xhr.__sentry_xhr__ ||
+      {};
 
     getCurrentHub().addBreadcrumb(
       {
@@ -205,7 +210,10 @@ function _fetchBreadcrumb(handlerData: { [key: string]: any }): void {
     return;
   }
 
-  if (handlerData.fetchData.url.match(/sentry_key/) && handlerData.fetchData.method === 'POST') {
+  if (
+    handlerData.fetchData.url.match(/sentry_key/) &&
+    handlerData.fetchData.method === 'POST'
+  ) {
     // We will not create breadcrumbs for fetch requests that contain `sentry_key` (internal sentry requests)
     return;
   }
@@ -260,10 +268,15 @@ function _historyBreadcrumb(handlerData: { [key: string]: any }): void {
 
   // Use only the path component of the URL if the URL matches the current
   // document (almost all the time when using pushState)
-  if (parsedLoc.protocol === parsedTo.protocol && parsedLoc.host === parsedTo.host) {
+  if (
+    parsedLoc.protocol === parsedTo.protocol && parsedLoc.host === parsedTo.host
+  ) {
     to = parsedTo.relative;
   }
-  if (parsedLoc.protocol === parsedFrom.protocol && parsedLoc.host === parsedFrom.host) {
+  if (
+    parsedLoc.protocol === parsedFrom.protocol &&
+    parsedLoc.host === parsedFrom.host
+  ) {
     from = parsedFrom.relative;
   }
 

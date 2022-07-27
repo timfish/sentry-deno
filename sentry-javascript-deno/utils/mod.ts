@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 export * from './browser.ts';
 export * from './dsn.ts';
 export * from './error.ts';

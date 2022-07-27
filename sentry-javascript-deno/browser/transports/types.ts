@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 import { BaseTransportOptions } from '../../types/mod.ts';
 
 export interface BrowserTransportOptions extends BaseTransportOptions {

@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 import { addGlobalEventProcessor, getCurrentHub } from '../../core/mod.ts';
 import { Event, Integration } from '../../types/mod.ts';
 import { getGlobalObject } from '../../utils/mod.ts';
@@ -29,7 +29,8 @@ export class HttpContext implements Integration {
         }
 
         // grab as much info as exists and add it to the event
-        const url = (event.request && event.request.url) || (global.location && global.location.href);
+        const url = (event.request && event.request.url) ||
+          (global.location && global.location.href);
         const { referrer } = global.document || {};
         const { userAgent } = global.navigator || {};
 

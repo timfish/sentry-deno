@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 import { getGlobalObject } from './global.ts';
 import { isString } from './is.ts';
 
@@ -35,7 +35,11 @@ export function htmlTreeAsString(elem: unknown, keyAttrs?: string[]): string {
       // - nextStr is the 'html' element
       // - the length of the string that would be created exceeds MAX_OUTPUT_LEN
       //   (ignore this limit if we are on the first iteration)
-      if (nextStr === 'html' || (height > 1 && len + out.length * sepLength + nextStr.length >= MAX_OUTPUT_LEN)) {
+      if (
+        nextStr === 'html' ||
+        (height > 1 &&
+          len + out.length * sepLength + nextStr.length >= MAX_OUTPUT_LEN)
+      ) {
         break;
       }
 
@@ -78,13 +82,14 @@ function _htmlElementAsString(el: unknown, keyAttrs?: string[]): string {
   out.push(elem.tagName.toLowerCase());
 
   // Pairs of attribute keys defined in `serializeAttribute` and their values on element.
-  const keyAttrPairs =
-    keyAttrs && keyAttrs.length
-      ? keyAttrs.filter(keyAttr => elem.getAttribute(keyAttr)).map(keyAttr => [keyAttr, elem.getAttribute(keyAttr)])
-      : null;
+  const keyAttrPairs = keyAttrs && keyAttrs.length
+    ? keyAttrs.filter((keyAttr) => elem.getAttribute(keyAttr)).map(
+      (keyAttr) => [keyAttr, elem.getAttribute(keyAttr)],
+    )
+    : null;
 
   if (keyAttrPairs && keyAttrPairs.length) {
-    keyAttrPairs.forEach(keyAttrPair => {
+    keyAttrPairs.forEach((keyAttrPair) => {
       out.push(`[${keyAttrPair[0]}="${keyAttrPair[1]}"]`);
     });
   } else {

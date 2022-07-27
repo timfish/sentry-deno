@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 import { Breadcrumb, BreadcrumbHint } from './breadcrumb.ts';
 import { Client } from './client.ts';
 import { Event, EventHint } from './event.ts';
@@ -8,7 +8,11 @@ import { Primitive } from './misc.ts';
 import { Scope } from './scope.ts';
 import { Session } from './session.ts';
 import { Severity, SeverityLevel } from './severity.ts';
-import { CustomSamplingContext, Transaction, TransactionContext } from './transaction.ts';
+import {
+  CustomSamplingContext,
+  Transaction,
+  TransactionContext,
+} from './transaction.ts';
 import { User } from './user.ts';
 
 /**
@@ -180,7 +184,9 @@ export interface Hub {
   run(callback: (hub: Hub) => void): void;
 
   /** Returns the integration if installed on the current client. */
-  getIntegration<T extends Integration>(integration: IntegrationClass<T>): T | null;
+  getIntegration<T extends Integration>(
+    integration: IntegrationClass<T>,
+  ): T | null;
 
   /** Returns all trace headers that are currently on the top scope. */
   traceHeaders(): { [key: string]: string };
@@ -202,7 +208,10 @@ export interface Hub {
    *
    * @returns The transaction which was just started
    */
-  startTransaction(context: TransactionContext, customSamplingContext?: CustomSamplingContext): Transaction;
+  startTransaction(
+    context: TransactionContext,
+    customSamplingContext?: CustomSamplingContext,
+  ): Transaction;
 
   /**
    * Starts a new `Session`, sets on the current scope and returns it.

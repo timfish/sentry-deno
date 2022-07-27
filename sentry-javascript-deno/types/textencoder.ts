@@ -1,4 +1,4 @@
-// deno-lint-ignore-file 
+// deno-lint-ignore-file
 /**
  * Vendored type from TS 3.8 `typescript/lib/lib.dom.d.ts`.
  *
