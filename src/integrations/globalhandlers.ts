@@ -4,11 +4,13 @@ import {
   EventHint,
   Hub,
   Integration,
+  Primitive,
   StackParser,
 } from '../../sentry-javascript-deno/types/mod.ts';
 import {
   addExceptionMechanism,
   getLocationHref,
+  isPrimitive,
   isString,
 } from '../../sentry-javascript-deno/utils/mod.ts';
 
@@ -16,7 +18,7 @@ import { DenoClient } from '../client.ts';
 import { eventFromUnknownInput } from '../eventbuilder.ts';
 import { flush } from '../mod.ts';
 
-type GlobalHandlersIntegrationsOptionKeys = 'error'; // | "onunhandledrejection";
+type GlobalHandlersIntegrationsOptionKeys = 'error' | 'unhandledrejection';
 
 /** JSDoc */
 type GlobalHandlersIntegrations = Record<
@@ -48,14 +50,14 @@ export class GlobalHandlers implements Integration {
     (() => void) | undefined
   > = {
     error: _installGlobalErrorHandler,
-    // onunhandledrejection: _installGlobalOnUnhandledRejectionHandler,
+    unhandledrejection: _installGlobalUnhandledRejectionHandler,
   };
 
   /** JSDoc */
   public constructor(options?: GlobalHandlersIntegrations) {
     this._options = {
       error: true,
-      //   onunhandledrejection: true,
+      unhandledrejection: true,
       ...options,
     };
   }
@@ -104,6 +106,71 @@ function _installGlobalErrorHandler(): void {
       Deno.exit(-1);
     });
   });
+}
+
+/** JSDoc */
+function _installGlobalUnhandledRejectionHandler(): void {
+  addEventListener('unhandledrejection', (e: PromiseRejectionEvent) => {
+    const [hub, stackParser] = getHubAndOptions();
+    if (!hub.getIntegration(GlobalHandlers)) {
+      return;
+    }
+    let error = e;
+
+    // dig the object of the rejection out of known event types
+    try {
+      if ('reason' in e) {
+        error = e.reason;
+      }
+    } catch (_oO) {
+      // no-empty
+    }
+
+    const event = isPrimitive(error)
+      ? _eventFromRejectionWithPrimitive(error)
+      : eventFromUnknownInput(stackParser, error, undefined);
+
+    event.level = 'error';
+
+    addMechanismAndCapture(
+      hub,
+      error as unknown as Error,
+      event,
+      'unhandledrejection',
+    );
+
+    // Stop the app from exiting for now
+    e.preventDefault();
+
+    flush().then(() => {
+      console.error(error);
+      Deno.exit(-1);
+    });
+  });
+}
+
+/**
+ * Create an event from a promise rejection where the `reason` is a primitive.
+ *
+ * @param reason: The `reason` property of the promise rejection
+ * @returns An Event object with an appropriate `exception` value
+ */
+function _eventFromRejectionWithPrimitive(reason: Primitive): Event {
+  return {
+    exception: {
+      values: [
+        {
+          type: 'UnhandledRejection',
+          // String() is needed because the Primitive type includes symbols (which can't be automatically stringified)
+          value: `Non-Error promise rejection captured with value: ${
+            String(
+              reason,
+            )
+          }`,
+        },
+      ],
+    },
+  };
 }
 
 function _enhanceEventWithInitialFrame(

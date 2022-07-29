@@ -18,8 +18,7 @@ source code will be included in stacktraces.
 
 ### Issues
 
-- Deno doesn't yet support catching `unhandledrejection`,
-  [looks like it's still a WIP](https://github.com/denoland/deno/pull/15210)
+- Deno added support for catching `unhandledrejection` in v1.24
 
 ### Further improvements
 
