@@ -26,6 +26,8 @@ type GlobalHandlersIntegrations = Record<
   boolean
 >;
 
+let isExiting = false;
+
 /** Global handlers */
 export class GlobalHandlers implements Integration {
   /**
@@ -84,6 +86,10 @@ export class GlobalHandlers implements Integration {
 
 function _installGlobalErrorHandler(): void {
   addEventListener('error', (data) => {
+    if (isExiting) {
+      return;
+    }
+
     const [hub, stackParser] = getHubAndOptions();
     const { message, filename, lineno, colno, error } = data;
 
@@ -100,10 +106,10 @@ function _installGlobalErrorHandler(): void {
 
     // Stop the app from exiting for now
     data.preventDefault();
+    isExiting = true;
 
     flush().then(() => {
-      console.error(data.error);
-      Deno.exit(-1);
+      throw error;
     });
   });
 }
@@ -111,6 +117,10 @@ function _installGlobalErrorHandler(): void {
 /** JSDoc */
 function _installGlobalUnhandledRejectionHandler(): void {
   addEventListener('unhandledrejection', (e: PromiseRejectionEvent) => {
+    if (isExiting) {
+      return;
+    }
+
     const [hub, stackParser] = getHubAndOptions();
     if (!hub.getIntegration(GlobalHandlers)) {
       return;
@@ -141,10 +151,10 @@ function _installGlobalUnhandledRejectionHandler(): void {
 
     // Stop the app from exiting for now
     e.preventDefault();
+    isExiting = true;
 
     flush().then(() => {
-      console.error(error);
-      Deno.exit(-1);
+      throw error;
     });
   });
 }

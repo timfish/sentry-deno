@@ -13,7 +13,7 @@ import {
 import { eventFromMessage, eventFromUnknownInput } from './eventbuilder.ts';
 import { DenoTransportOptions } from './transport.ts';
 
-const SDK_VERSION = '0.2.1';
+const SDK_VERSION = '0.2.2';
 
 export interface DenoClientOptions extends ClientOptions<DenoTransportOptions> {
   /**

@@ -45,6 +45,10 @@ export function init(options: DenoOptions = {}) {
     return;
   }
 
+  globalThis.addEventListener('beforeunload', (_) => {
+    flush();
+  });
+
   if (options.defaultIntegrations == undefined) {
     options.defaultIntegrations = defaultIntegrations;
   }
