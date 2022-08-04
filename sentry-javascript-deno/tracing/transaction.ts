@@ -49,7 +49,11 @@ export class Transaction extends SpanClass implements TransactionInterface {
 
     this._name = transactionContext.name || '';
 
-    this.metadata = transactionContext.metadata || {};
+    this.metadata = {
+      ...transactionContext.metadata,
+      spanMetadata: {},
+    };
+
     this._trimEnd = transactionContext.trimEnd;
 
     // this is because transactions are also spans, and spans have a transaction pointer
@@ -103,7 +107,7 @@ export class Transaction extends SpanClass implements TransactionInterface {
   /**
    * @inheritDoc
    */
-  public setMetadata(newMetadata: TransactionMetadata): void {
+  public setMetadata(newMetadata: Partial<TransactionMetadata>): void {
     this.metadata = { ...this.metadata, ...newMetadata };
   }
 
@@ -266,14 +270,10 @@ export class Transaction extends SpanClass implements TransactionInterface {
     const { environment, release } = client.getOptions() || {};
     const { publicKey: public_key } = client.getDsn() || {};
 
-    const rate = this.metadata && this.metadata.transactionSampling &&
-      this.metadata.transactionSampling.rate;
-    const sample_rate = rate !== undefined
-      ? rate.toLocaleString('fullwide', {
-        useGrouping: false,
-        maximumFractionDigits: 16,
-      })
-      : undefined;
+    const sample_rate = this.metadata &&
+      this.metadata.transactionSampling &&
+      this.metadata.transactionSampling.rate &&
+      this.metadata.transactionSampling.rate.toString();
 
     const scope = hub.getScope();
     const { segment: user_segment } = (scope && scope.getUser()) || {};

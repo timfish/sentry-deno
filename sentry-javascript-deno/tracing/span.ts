@@ -6,7 +6,12 @@ import {
   SpanContext,
   Transaction,
 } from '../types/mod.ts';
-import { dropUndefinedKeys, timestampWithMs, uuid4 } from '../utils/mod.ts';
+import {
+  dropUndefinedKeys,
+  logger,
+  timestampWithMs,
+  uuid4,
+} from '../utils/mod.ts';
 
 /**
  * Keeps track of finished spans for a given transaction
@@ -181,6 +186,19 @@ export class Span implements SpanInterface {
 
     childSpan.transaction = this.transaction;
 
+    if (true && childSpan.transaction) {
+      const opStr = (spanContext && spanContext.op) || '< unknown op >';
+      const nameStr = childSpan.transaction.name || '< unknown name >';
+      const idStr = childSpan.transaction.spanId;
+
+      const logMessage =
+        `[Tracing] Starting '${opStr}' span on transaction '${nameStr}' (${idStr}).`;
+      childSpan.transaction.metadata.spanMetadata[childSpan.spanId] = {
+        logMessage,
+      };
+      logger.log(logMessage);
+    }
+
     return childSpan;
   }
 
@@ -232,6 +250,19 @@ export class Span implements SpanInterface {
    * @inheritDoc
    */
   public finish(endTimestamp?: number): void {
+    if (
+      true &&
+      // Don't call this for transactions
+      this.transaction &&
+      this.transaction.spanId !== this.spanId
+    ) {
+      const { logMessage } =
+        this.transaction.metadata.spanMetadata[this.spanId];
+      if (logMessage) {
+        logger.log((logMessage as string).replace('Starting', 'Finishing'));
+      }
+    }
+
     this.endTimestamp = typeof endTimestamp === 'number'
       ? endTimestamp
       : timestampWithMs();

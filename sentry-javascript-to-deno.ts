@@ -250,6 +250,7 @@ function denoifyFor(pkg: string) {
         replace: 'return original.apply(this, args) as any;',
       },
       { match: /global\.crypto/g, replace: '(global as any).crypto' },
+      { match: /randomUUID\?\(\): string;/g, replace: '' },
     ],
   });
 }
