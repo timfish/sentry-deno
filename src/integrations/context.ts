@@ -12,6 +12,8 @@ function getOSName(): string {
       return 'Linux';
     case 'windows':
       return 'Windows';
+    default:
+      return 'Unknown';
   }
 }
 
@@ -36,13 +38,16 @@ export class DenoContext implements Integration {
         },
         device: {
           arch: Deno.build.arch,
+          processor_count: navigator.hardwareConcurrency,
         },
         os: {
           name: getOSName(),
         },
-        runtime: {
+        deno: {
           name: 'Deno',
+          type: 'runtime',
           version: Deno.version.deno,
+          target: Deno.build.target,
         },
         v8: {
           name: 'v8',

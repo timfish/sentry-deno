@@ -82,8 +82,13 @@ function normalizeEvent(event: Event): Event {
     event.contexts.v8.version = '{{version}}';
   }
 
-  if (event.contexts?.runtime?.version) {
-    event.contexts.runtime.version = '{{version}}';
+  if (event.contexts?.deno) {
+    if (event.contexts.deno?.version) {
+      event.contexts.deno.version = '{{version}}';
+    }
+    if (event.contexts.deno?.target) {
+      event.contexts.deno.target = '{{target}}';
+    }
   }
 
   if (event.contexts?.device?.arch) {

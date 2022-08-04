@@ -6,15 +6,18 @@ snapshot[`captureException 1`] = `
     app: {
       app_start_time: "{{time}}",
     },
+    deno: {
+      name: "Deno",
+      target: "{{target}}",
+      type: "runtime",
+      version: "{{version}}",
+    },
     device: {
       arch: "{{arch}}",
+      processor_count: 0,
     },
     os: {
       name: "{{platform}}",
-    },
-    runtime: {
-      name: "Deno",
-      version: "{{version}}",
     },
     typescript: {
       name: "TypeScript",
@@ -127,15 +130,18 @@ snapshot[`captureMessage 1`] = `
     app: {
       app_start_time: "{{time}}",
     },
+    deno: {
+      name: "Deno",
+      target: "{{target}}",
+      type: "runtime",
+      version: "{{version}}",
+    },
     device: {
       arch: "{{arch}}",
+      processor_count: 0,
     },
     os: {
       name: "{{platform}}",
-    },
-    runtime: {
-      name: "Deno",
-      version: "{{version}}",
     },
     typescript: {
       name: "TypeScript",
