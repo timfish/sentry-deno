@@ -17,6 +17,12 @@ function getOSName(): string {
   }
 }
 
+function hardwareConcurrency(): number | undefined {
+  return 'hardwareConcurrency' in navigator
+    ? navigator.hardwareConcurrency
+    : undefined;
+}
+
 /** Adds Electron context to events. */
 export class DenoContext implements Integration {
   /** @inheritDoc */
@@ -38,7 +44,6 @@ export class DenoContext implements Integration {
         },
         device: {
           arch: Deno.build.arch,
-          processor_count: navigator.hardwareConcurrency,
         },
         os: {
           name: getOSName(),
@@ -58,6 +63,12 @@ export class DenoContext implements Integration {
           version: Deno.version.typescript,
         },
       };
+
+      const processor_count = hardwareConcurrency();
+
+      if (processor_count) {
+        event.contexts.device.processor_count = processor_count;
+      }
 
       event.user = { ip_address: '{{auto}}', ...event.user };
 
