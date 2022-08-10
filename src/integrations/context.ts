@@ -17,10 +17,86 @@ function getOSName(): string {
   }
 }
 
-function hardwareConcurrency(): number | undefined {
-  return 'hardwareConcurrency' in navigator
-    ? navigator.hardwareConcurrency
-    : undefined;
+function denoRuntime(event: Event): Event {
+  event.contexts = {
+    ...{
+      app: {
+        app_start_time: new Date(Date.now() - performance.now()).toISOString(),
+      },
+      device: {
+        arch: Deno.build.arch,
+        processor_count: navigator.hardwareConcurrency,
+      },
+      os: {
+        name: getOSName(),
+      },
+      deno: {
+        name: 'Deno',
+        type: 'runtime',
+        version: Deno.version.deno,
+        target: Deno.build.target,
+      },
+      v8: {
+        name: 'v8',
+        version: Deno.version.v8,
+      },
+      typescript: {
+        name: 'TypeScript',
+        version: Deno.version.typescript,
+      },
+    },
+    ...event.contexts,
+  };
+
+  event.user = { ip_address: '{{auto}}', ...event.user };
+
+  return event;
+}
+
+interface DeployEnv {
+  DENO_DEPLOYMENT_ID: string;
+  DENO_REGION: string;
+}
+
+async function deployEnv(): Promise<DeployEnv | undefined> {
+  const permission = await Deno.permissions.query({
+    name: 'env',
+    variable: 'DENO_DEPLOYMENT_ID',
+  });
+
+  if (permission.state !== 'granted') {
+    return;
+  }
+
+  const DENO_DEPLOYMENT_ID = await Deno.env.get('DENO_DEPLOYMENT_ID');
+  const DENO_REGION = await Deno.env.get('DENO_REGION');
+
+  if (DENO_DEPLOYMENT_ID && DENO_REGION) {
+    return { DENO_DEPLOYMENT_ID, DENO_REGION };
+  }
+}
+
+async function denoDeployRuntime(event: Event): Promise<Event | undefined> {
+  const env = await deployEnv();
+
+  if (env === undefined) {
+    return undefined;
+  }
+
+  event.release = event.release || env.DENO_DEPLOYMENT_ID;
+
+  event.contexts = {
+    app: {
+      app_start_time: new Date(Date.now() - performance.now()).toISOString(),
+    },
+    ...event.contexts,
+  };
+
+  event.tags = {
+    deploy_region: env.DENO_REGION,
+    ...event.tags,
+  };
+  return event;
 }
 
 /** Adds Electron context to events. */
@@ -35,44 +111,9 @@ export class DenoContext implements Integration {
   public setupOnce(
     addGlobalEventProcessor: (callback: EventProcessor) => void,
   ): void {
-    addGlobalEventProcessor((event: Event) => {
-      event.contexts = {
-        app: {
-          app_start_time: new Date(
-            Date.now() - performance.now(),
-          ).toISOString(),
-        },
-        device: {
-          arch: Deno.build.arch,
-        },
-        os: {
-          name: getOSName(),
-        },
-        deno: {
-          name: 'Deno',
-          type: 'runtime',
-          version: Deno.version.deno,
-          target: Deno.build.target,
-        },
-        v8: {
-          name: 'v8',
-          version: Deno.version.v8,
-        },
-        typescript: {
-          name: 'TypeScript',
-          version: Deno.version.typescript,
-        },
-      };
-
-      const processor_count = hardwareConcurrency();
-
-      if (processor_count) {
-        event.contexts.device.processor_count = processor_count;
-      }
-
-      event.user = { ip_address: '{{auto}}', ...event.user };
-
-      return event;
-    });
+    addGlobalEventProcessor(
+      async (event: Event) =>
+        (await denoDeployRuntime(event)) || denoRuntime(event),
+    );
   }
 }

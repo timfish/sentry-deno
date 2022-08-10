@@ -7,7 +7,7 @@ import {
 import { Event, Integration } from '../sentry-javascript-deno/types/mod.ts';
 import { Hub, Scope } from '../sentry-javascript-deno/hub/mod.ts';
 import { getNormalizedEvent } from './envelope.ts';
-import { assertSnapshot } from 'https://deno.land/std@0.149.0/testing/snapshot.ts';
+import { assertSnapshot } from 'https://deno.land/std@0.151.0/testing/snapshot.ts';
 
 function getTestClient(
   callback: (event?: Event) => void,

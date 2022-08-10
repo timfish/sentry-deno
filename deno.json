@@ -15,7 +15,7 @@
   "tasks": {
     "generate-deps": "rm -rf sentry-javascript-deno && deno run --allow-all sentry-javascript-to-deno.ts",
     "test-bundle": "deno bundle ./mod.ts",
-    "test": "deno test --allow-read=./test,./src ./test",
+    "test": "deno test --allow-read=./test,./src --allow-net ./test",
     "test-update": "deno test --allow-all ./test -- --update"
   }
 }
